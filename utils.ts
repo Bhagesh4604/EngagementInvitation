@@ -29,6 +29,7 @@ END:VCALENDAR`;
   link.click();
   document.body.removeChild(link);
 };
+<<<<<<< HEAD
 
 // --- Persistence Utilities ---
 
@@ -145,3 +146,5 @@ export const storage = {
     }
   }
 };
+=======
+>>>>>>> cbdda10 (QR)

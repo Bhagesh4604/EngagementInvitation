@@ -16,7 +16,11 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ isAdmin, onLogin, curren
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
+<<<<<<< HEAD
     if (password === 'Bhagesh@9797') {
+=======
+    if (password === 'admin' || password === 'siddharamswapna') {
+>>>>>>> cbdda10 (QR)
       onLogin(true);
       setPassword('');
       setIsOpen(false);
@@ -83,6 +87,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ isAdmin, onLogin, curren
                 <button type="submit" className="w-full bg-f-pink hover:bg-f-orange text-white font-bold py-3 rounded transition-colors">
                   LOGIN
                 </button>
+<<<<<<< HEAD
+=======
+                <p className="text-center text-xs text-f-white/60">(Try: admin)</p>
+>>>>>>> cbdda10 (QR)
               </form>
             ) : (
               <div className="space-y-6">
@@ -131,4 +139,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ isAdmin, onLogin, curren
       )}
     </>
   );
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> cbdda10 (QR)

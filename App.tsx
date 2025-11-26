@@ -4,17 +4,25 @@ import { Hero } from './components/Hero';
 import { Section } from './components/Section';
 import { Ornament, MandalaPattern } from './components/Ornament';
 import { Gallery } from './components/Gallery';
+<<<<<<< HEAD
 import { generateICSFile, storage } from './utils';
+=======
+import { generateICSFile } from './utils';
+>>>>>>> cbdda10 (QR)
 import { MapPin, Calendar, Clock, Heart, Phone, Mail, Music, ExternalLink, Download, Trash2, Plus, PenSquare } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { AdminPanel } from './components/AdminPanel';
+<<<<<<< HEAD
 import { MusicPlayer } from './components/MusicPlayer';
+=======
+>>>>>>> cbdda10 (QR)
 import { SiteContent, Wish, Theme, TimelineItem } from './types';
 import { Editable } from './components/Editable';
 import { QRCodePage } from './components/QRCodePage';
 import QRCode from 'qrcode.react';
 
+<<<<<<< HEAD
 // Default Data Constants
 const DEFAULT_CONTENT: SiteContent = {
   heroTitle1: 'Siddharam',
@@ -39,11 +47,14 @@ const DEFAULT_TIMELINE: TimelineItem[] = [
   { id: 3, time: '8:30 PM', title: 'Dinner & Photos', description: 'A traditional vegetarian feast followed by a photo session with the couple.' }
 ];
 
+=======
+>>>>>>> cbdda10 (QR)
 export default function App() {
   const printRef = useRef<HTMLDivElement>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [route, setRoute] = useState('/');
+<<<<<<< HEAD
   
   // Initialize State from Storage or Defaults
   // Using a function in useState ensures this only runs once on mount
@@ -80,6 +91,8 @@ export default function App() {
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, []);
+=======
+>>>>>>> cbdda10 (QR)
 
   useEffect(() => {
     const handlePopState = () => {
@@ -91,10 +104,52 @@ export default function App() {
       window.removeEventListener('popstate', handlePopState);
     };
   }, []);
+<<<<<<< HEAD
+=======
+  
+  // Theme State
+  const [theme, setTheme] = useState<Theme>('default');
+
+  // Content State
+  const [content, setContent] = useState<SiteContent>({
+    heroTitle1: 'Siddharam',
+    heroTitle2: 'Swapna',
+    heroSubtitle: 'With the blessings of our families',
+    heroDate: 'DECEMBER 15, 2025',
+    heroVenue: 'IK Royal Function Hall, Almel',
+    heroBgUrl: 'https://images.unsplash.com/photo-1621621667797-e06afc21085c?q=80&w=2000&auto=format&fit=crop',
+    storyTitle: 'Our Story',
+    storyText: 'In the heart of tradition and family values, our paths crossed. What began as a meeting arranged by our elders blossomed into a connection grounded in mutual respect, shared dreams, and laughter. Siddharam, with his calm demeanor, and Swapna, with her vibrant spirit, found in each other a perfect balance. Now, with hearts full of gratitude, we are ready to take the first step towards our forever.',
+    eventDate: 'Monday, December 15, 2025',
+    eventVenueTitle: 'IK Royal Function Hall',
+    eventVenueAddr: 'Main Road, Almel, Karnataka',
+    eventTime: '6:00 PM Onwards',
+    contactPhone: '+91 98765 43210',
+    contactEmail: 'hello@siddharamswapna.com'
+  });
+
+  // Timeline State
+  const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([
+      { id: 1, time: '6:00 PM', title: 'Arrival & Welcome', description: 'Guests arrive. Welcome drinks and snacks will be served accompanied by Shehnai music.' },
+      { id: 2, time: '7:00 PM', title: 'Ring Ceremony', description: 'The auspicious moment where we exchange rings and seek blessings from our elders.' },
+      { id: 3, time: '8:30 PM', title: 'Dinner & Photos', description: 'A traditional vegetarian feast followed by a photo session with the couple.' }
+  ]);
+
+  // Wishes State
+  const [wishes, setWishes] = useState<Wish[]>([
+    { id: 1, author: 'Rajesh & Family', message: 'Congratulations Siddharam & Swapna! Wishing you a lifetime of happiness.', timestamp: 1 },
+    { id: 2, author: 'Priya K.', message: 'So happy for you both! Can\'t wait to celebrate.', timestamp: 2 }
+  ]);
+  const [newWish, setNewWish] = useState('');
+>>>>>>> cbdda10 (QR)
 
   // Handle Theme Change
   const handleThemeChange = (newTheme: Theme) => {
     setTheme(newTheme);
+<<<<<<< HEAD
+=======
+    document.documentElement.setAttribute('data-theme', newTheme);
+>>>>>>> cbdda10 (QR)
   };
 
   // Handle Content Update
@@ -103,9 +158,15 @@ export default function App() {
   };
 
   const resetHeroBg = () => {
+<<<<<<< HEAD
       setContent(prev => ({
           ...prev, 
           heroBgUrl: 'https://images.unsplash.com/photo-1621621667797-e06afc21085c?q=80&w=2000&auto=format&fit=crop'
+=======
+      setContent(prev => ({ 
+          ...prev, 
+          heroBgUrl: 'https://images.unsplash.com/photo-1621621667797-e06afc21085c?q=80&w=2000&auto=format&fit=crop' 
+>>>>>>> cbdda10 (QR)
       }));
   };
 
@@ -179,9 +240,14 @@ export default function App() {
   }
 
   return (
+<<<<<<< HEAD
     <div className="font-sans text-f-white bg-f-purple min-h-screen transition-colors duration-500">
       <Header />
       <MusicPlayer />
+=======
+    <div className="font-sans text-f-white bg-f-purple min-h-screen">
+      <Header />
+>>>>>>> cbdda10 (QR)
       
       <AdminPanel 
         isAdmin={isAdmin} 
@@ -198,7 +264,11 @@ export default function App() {
             
             <div className="relative z-10 w-full flex flex-col items-center pt-8">
                 <Ornament color="fill-f-orange" />
+<<<<<<< HEAD
                 <p className="font-serif text-f-pink uppercase tracking-[0.2em] text-lg mt-8 mb-4 text-f-white">
+=======
+                <p className="font-serif text-f-pink uppercase tracking-[0.2em] text-lg mt-8 mb-4">
+>>>>>>> cbdda10 (QR)
                     {content.heroSubtitle}
                 </p>
                 <p className="font-serif text-f-white text-xl italic mb-12">
@@ -399,7 +469,11 @@ export default function App() {
                         </div>
                     </div>
                     <p className="text-sm text-f-white/60 italic mt-4 pl-10">
+<<<<<<< HEAD
                         Ample parking is available at the venue.
+=======
+                         Parking is available at the venue.
+>>>>>>> cbdda10 (QR)
                     </p>
                 </div>
             </div>
@@ -409,8 +483,13 @@ export default function App() {
                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3801.077285328409!2d76.123456!3d17.123456!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTfCsDA3JzM0LjQiTiA3NsKwMDcnMjQuNCJF!5e0!3m2!1sen!2sin!4v1625634567890!5m2!1sen!2sin&maptype=satellite" 
                     width="100%" 
                     height="100%" 
+<<<<<<< HEAD
                     style={{border:0, filter: 'grayscale(0.5) contrast(1.2)'}}
                     allowFullScreen={true}
+=======
+                    style={{border:0, filter: 'grayscale(0.5) contrast(1.2)'}} 
+                    allowFullScreen={true} 
+>>>>>>> cbdda10 (QR)
                     loading="lazy"
                     title="Venue Map"
                 ></iframe>
@@ -504,11 +583,20 @@ export default function App() {
 
             <Ornament color="fill-f-pink" className="opacity-50 mb-8" />
             
+<<<<<<< HEAD
             <p className="text-xs text-f-white/60 uppercase tracking-widest flex items-center justify-center gap-2">
                 © 2025  Made by Bhagesh <Heart size={12} fill="currentColor" className="text-f-pink" />
+=======
+            <p className="text-xs text-f-white/60 uppercase tracking-widest">
+                © 2025 Siddharam & Swapna. Made with Love.
+>>>>>>> cbdda10 (QR)
             </p>
         </div>
       </footer>
     </div>
   );
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> cbdda10 (QR)
