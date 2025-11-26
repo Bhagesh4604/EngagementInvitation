@@ -4,7 +4,7 @@ import { Hero } from './components/Hero';
 import { Section } from './components/Section';
 import { Ornament, MandalaPattern } from './components/Ornament';
 import { Gallery } from './components/Gallery';
-import { generateICSFile } from './utils';
+import { generateICSFile, storage } from './utils';
 import { MapPin, Calendar, Clock, Heart, Phone, Mail, Music, ExternalLink, Download, Trash2, Plus, PenSquare } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -12,50 +12,72 @@ import { AdminPanel } from './components/AdminPanel';
 import { SiteContent, Wish, Theme, TimelineItem } from './types';
 import { Editable } from './components/Editable';
 
+// Default Data Constants
+const DEFAULT_CONTENT: SiteContent = {
+  heroTitle1: 'Siddharam',
+  heroTitle2: 'Swapna',
+  heroSubtitle: 'With the blessings of our families',
+  heroDate: 'DECEMBER 15, 2025',
+  heroVenue: 'IK Royal Function Hall, Almel',
+  heroBgUrl: 'https://images.unsplash.com/photo-1621621667797-e06afc21085c?q=80&w=2000&auto=format&fit=crop',
+  storyTitle: 'Our Story',
+  storyText: 'In the heart of tradition and family values, our paths crossed. What began as a meeting arranged by our elders blossomed into a connection grounded in mutual respect, shared dreams, and laughter. Siddharam, with his calm demeanor, and Swapna, with her vibrant spirit, found in each other a perfect balance. Now, with hearts full of gratitude, we are ready to take the first step towards our forever.',
+  eventDate: 'Monday, December 15, 2025',
+  eventVenueTitle: 'IK Royal Function Hall',
+  eventVenueAddr: 'Main Road, Almel, Karnataka',
+  eventTime: '6:00 PM Onwards',
+  contactPhone: '+91 98765 43210',
+  contactEmail: 'hello@siddharamswapna.com'
+};
+
+const DEFAULT_TIMELINE: TimelineItem[] = [
+  { id: 1, time: '6:00 PM', title: 'Arrival & Welcome', description: 'Guests arrive. Welcome drinks and snacks will be served accompanied by Shehnai music.' },
+  { id: 2, time: '7:00 PM', title: 'Ring Ceremony', description: 'The auspicious moment where we exchange rings and seek blessings from our elders.' },
+  { id: 3, time: '8:30 PM', title: 'Dinner & Photos', description: 'A traditional vegetarian feast followed by a photo session with the couple.' }
+];
+
 export default function App() {
   const printRef = useRef<HTMLDivElement>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   
-  // Theme State
-  const [theme, setTheme] = useState<Theme>('default');
-
-  // Content State
-  const [content, setContent] = useState<SiteContent>({
-    heroTitle1: 'Siddharam',
-    heroTitle2: 'Swapna',
-    heroSubtitle: 'With the blessings of our families',
-    heroDate: 'DECEMBER 15, 2025',
-    heroVenue: 'IK Royal Function Hall, Almel',
-    heroBgUrl: 'https://images.unsplash.com/photo-1621621667797-e06afc21085c?q=80&w=2000&auto=format&fit=crop',
-    storyTitle: 'Our Story',
-    storyText: 'In the heart of tradition and family values, our paths crossed. What began as a meeting arranged by our elders blossomed into a connection grounded in mutual respect, shared dreams, and laughter. Siddharam, with his calm demeanor, and Swapna, with her vibrant spirit, found in each other a perfect balance. Now, with hearts full of gratitude, we are ready to take the first step towards our forever.',
-    eventDate: 'Monday, December 15, 2025',
-    eventVenueTitle: 'IK Royal Function Hall',
-    eventVenueAddr: 'Main Road, Almel, Karnataka',
-    eventTime: '6:00 PM Onwards',
-    contactPhone: '+91 98765 43210',
-    contactEmail: 'hello@siddharamswapna.com'
-  });
-
-  // Timeline State
-  const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([
-      { id: 1, time: '6:00 PM', title: 'Arrival & Welcome', description: 'Guests arrive. Welcome drinks and snacks will be served accompanied by Shehnai music.' },
-      { id: 2, time: '7:00 PM', title: 'Ring Ceremony', description: 'The auspicious moment where we exchange rings and seek blessings from our elders.' },
-      { id: 3, time: '8:30 PM', title: 'Dinner & Photos', description: 'A traditional vegetarian feast followed by a photo session with the couple.' }
-  ]);
-
-  // Wishes State
-  const [wishes, setWishes] = useState<Wish[]>([
+  // Initialize State from Storage or Defaults
+  const [theme, setTheme] = useState<Theme>(() => storage.load<Theme>('site_theme', 'elegant'));
+  const [content, setContent] = useState<SiteContent>(() => storage.load<SiteContent>('site_content', DEFAULT_CONTENT));
+  const [timelineItems, setTimelineItems] = useState<TimelineItem[]>(() => storage.load<TimelineItem[]>('site_timeline', DEFAULT_TIMELINE));
+  const [wishes, setWishes] = useState<Wish[]>(() => storage.load<Wish[]>('site_wishes', [
     { id: 1, author: 'Rajesh & Family', message: 'Congratulations Siddharam & Swapna! Wishing you a lifetime of happiness.', timestamp: 1 },
     { id: 2, author: 'Priya K.', message: 'So happy for you both! Can\'t wait to celebrate.', timestamp: 2 }
-  ]);
+  ]));
+  
   const [newWish, setNewWish] = useState('');
+
+  // Persist State Changes
+  useEffect(() => {
+    storage.save('site_theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  useEffect(() => {
+    storage.save('site_content', content);
+  }, [content]);
+
+  useEffect(() => {
+    storage.save('site_timeline', timelineItems);
+  }, [timelineItems]);
+
+  useEffect(() => {
+    storage.save('site_wishes', wishes);
+  }, [wishes]);
+
+  // Initial Theme Set
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, []);
 
   // Handle Theme Change
   const handleThemeChange = (newTheme: Theme) => {
     setTheme(newTheme);
-    document.documentElement.setAttribute('data-theme', newTheme);
   };
 
   // Handle Content Update
@@ -154,7 +176,7 @@ export default function App() {
             
             <div className="relative z-10 w-full flex flex-col items-center pt-8">
                 <Ornament color="fill-f-orange" />
-                <p className="font-serif text-f-pink uppercase tracking-[0.2em] text-lg mt-8 mb-4">
+                <p className="font-serif text-f-pink uppercase tracking-[0.2em] text-lg mt-8 mb-4 text-f-white">
                     {content.heroSubtitle}
                 </p>
                 <p className="font-serif text-f-white text-xl italic mb-12">

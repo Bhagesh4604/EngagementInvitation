@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Upload, Shield, Check, Trash2, ImagePlus, RefreshCcw, Download, QrCode, Grid, Users, Camera, Lock } from 'lucide-react';
 import { GalleryItem } from '../types';
+import { imageDB } from '../utils';
 
 const defaultImages = [
     "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800&auto=format&fit=crop",
@@ -16,15 +17,7 @@ interface GalleryProps {
 }
 
 export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
-  const [images, setImages] = useState<GalleryItem[]>(
-    defaultImages.map((url, idx) => ({
-      id: `def-${idx}`,
-      url,
-      status: 'approved',
-      isUserUploaded: false,
-      timestamp: Date.now()
-    }))
-  );
+  const [images, setImages] = useState<GalleryItem[]>([]);
   
   const [activeTab, setActiveTab] = useState<'official' | 'guest'>('official');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -35,90 +28,128 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
   // State for QR Scan Landing Modal
   const [showScanOptions, setShowScanOptions] = useState(false);
 
+  // Load images from DB on mount
+  useEffect(() => {
+    const loadImages = async () => {
+        try {
+            const stored = await imageDB.getAll();
+            if (stored && stored.length > 0) {
+                setImages(stored);
+            } else {
+                // Initial load of default images if DB is empty
+                const initialItems: GalleryItem[] = defaultImages.map((url, idx) => ({
+                    id: `def-${idx}`,
+                    url,
+                    status: 'approved',
+                    isUserUploaded: false,
+                    timestamp: Date.now()
+                }));
+                // We don't save defaults to DB automatically to save space, or we can.
+                // Let's keep them in state.
+                setImages(initialItems);
+            }
+        } catch (e) {
+            console.error("Failed to load images", e);
+        }
+    };
+    loadImages();
+  }, []);
+
   // Check URL for scan action on mount
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('action') === 'scan') {
       setShowScanOptions(true);
-      // Clean URL without reloading to remove the query param
+      // Clean URL without reloading
       const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
       window.history.replaceState({}, '', newUrl);
     }
   }, []);
 
-  // Generate a clean URL for the QR code
-  // We strip search params to ensure the QR code is clean and then append our specific action
   const cleanBaseUrl = window.location.href.split('?')[0];
   const qrCodeData = `${cleanBaseUrl}?action=scan`;
-  // Use QuickChart API for robust rendering with High Error Correction (ecLevel=H)
   const qrCodeUrl = `https://quickchart.io/qr?text=${encodeURIComponent(qrCodeData)}&size=300&ecLevel=H&margin=2&dark=000000&light=ffffff`;
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     setIsUploading(true);
     setUploadMessage(null);
-    setShowScanOptions(false); // Close scan modal if open
+    setShowScanOptions(false);
 
     let processedCount = 0;
     const newItems: GalleryItem[] = [];
 
-    Array.from(files).forEach(file => {
-        if (!file.type.startsWith('image/')) {
-            processedCount++;
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            newItems.push({
-                id: Date.now() + Math.random(),
-                url: reader.result as string,
-                status: isAdmin ? 'approved' : 'pending',
-                isUserUploaded: true,
-                timestamp: Date.now()
-            });
-            
-            processedCount++;
-            if (processedCount === files.length) {
-                setImages(prev => [...newItems, ...prev]);
-                setIsUploading(false);
-                setUploadMessage(isAdmin ? `Added ${newItems.length} photos.` : `Uploaded ${newItems.length} photos! Awaiting approval.`);
-                setTimeout(() => setUploadMessage(null), 4000);
-                
-                // Automatically switch to guest tab if uploading
-                setActiveTab('guest');
+    const filePromises = Array.from(files).map(file => {
+        return new Promise<void>((resolve) => {
+            if (!file.type.startsWith('image/')) {
+                resolve();
+                return;
             }
-        };
-        // Use readAsDataURL to keep original quality logic (Base64)
-        reader.readAsDataURL(file);
+            const reader = new FileReader();
+            reader.onloadend = async () => {
+                const item: GalleryItem = {
+                    id: Date.now() + Math.random(),
+                    url: reader.result as string,
+                    status: isAdmin ? 'approved' : 'pending',
+                    isUserUploaded: true,
+                    timestamp: Date.now()
+                };
+                newItems.push(item);
+                // Save to DB
+                await imageDB.save(item);
+                resolve();
+            };
+            reader.readAsDataURL(file);
+        });
     });
+
+    await Promise.all(filePromises);
+
+    setImages(prev => [...newItems, ...prev]);
+    setIsUploading(false);
+    setUploadMessage(isAdmin ? `Added ${newItems.length} photos.` : `Uploaded ${newItems.length} photos! Awaiting approval.`);
+    setTimeout(() => setUploadMessage(null), 4000);
+    setActiveTab('guest');
   };
 
-  const handleReplaceImage = (e: React.ChangeEvent<HTMLInputElement>, id: string | number) => {
+  const handleReplaceImage = async (e: React.ChangeEvent<HTMLInputElement>, id: string | number) => {
     const file = e.target.files?.[0];
     if (file) {
         const reader = new FileReader();
-        reader.onloadend = () => {
-            setImages(prev => prev.map(img => img.id === id ? { ...img, url: reader.result as string } : img));
+        reader.onloadend = async () => {
+            const newUrl = reader.result as string;
+            setImages(prev => prev.map(img => {
+                if (img.id === id) {
+                    const updated = { ...img, url: newUrl };
+                    // If it's a DB item (not string id usually, but let's just try saving)
+                    imageDB.save(updated).catch(err => console.log('Could not save replaced image to DB (might be default)', err));
+                    return updated;
+                }
+                return img;
+            }));
         };
         reader.readAsDataURL(file);
     }
   };
 
-  const approvePhoto = (id: string | number) => {
-    setImages(prev => prev.map(img => img.id === id ? { ...img, status: 'approved' } : img));
+  const approvePhoto = async (id: string | number) => {
+    const item = images.find(img => img.id === id);
+    if (item) {
+        const updated = { ...item, status: 'approved' as const };
+        setImages(prev => prev.map(img => img.id === id ? updated : img));
+        await imageDB.save(updated);
+    }
   };
 
-  const rejectPhoto = (id: string | number) => {
+  const rejectPhoto = async (id: string | number) => {
     setImages(prev => prev.filter(img => img.id !== id));
+    await imageDB.delete(id);
   };
 
   const handleDownload = async (url: string) => {
     try {
-        // Fetch the Base64/URL content to a blob to force download logic
-        // This ensures the browser downloads the original file data rather than just opening the link
         const response = await fetch(url);
         const blob = await response.blob();
         const blobUrl = window.URL.createObjectURL(blob);
@@ -132,7 +163,6 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
         window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
         console.error("Download failed", error);
-        // Fallback for simple URLs
         const link = document.createElement('a');
         link.href = url;
         link.download = `Siddharam-Swapna-${Date.now()}.jpg`;
@@ -140,13 +170,8 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
     }
   };
 
-  // Permission Logic:
-  // Admin can download anything.
-  // Guests can download FROM GUEST TAB ONLY.
-  // Guests CANNOT download from Official Tab.
   const canDownload = isAdmin || (activeTab === 'guest');
 
-  // Filtering Logic
   const approvedImages = images.filter(img => img.status === 'approved');
   const displayImages = activeTab === 'official' 
       ? approvedImages.filter(img => !img.isUserUploaded)
@@ -156,10 +181,7 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
 
   return (
     <div className="space-y-8 relative">
-        {/* Controls Bar */}
         <div className="flex flex-col gap-6 mb-8">
-             
-             {/* Action Buttons */}
              <div className="flex flex-wrap justify-center items-center gap-4">
                 <div className="relative">
                     <input 
@@ -167,7 +189,7 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                         id="photo-upload" 
                         className="hidden" 
                         accept="image/*"
-                        multiple // Allow multiple files
+                        multiple 
                         onChange={handleFileUpload}
                         disabled={isUploading}
                     />
@@ -191,7 +213,6 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                 </button>
              </div>
 
-             {/* Tabs */}
              <div className="flex justify-center">
                  <div className="flex bg-f-blue/30 p-1 rounded-full glass border border-f-pink/20">
                      <button 
@@ -222,7 +243,6 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
             </div>
         )}
 
-        {/* Moderation Queue (Admin Only) */}
         {isAdmin && pendingImages.length > 0 && (
             <div className="bg-f-blue/40 border-2 border-f-orange/30 rounded-xl p-6 mb-8 animate-fade-in-up glass">
                 <h3 className="text-f-orange font-serif text-2xl mb-4 flex items-center justify-center gap-2">
@@ -256,20 +276,17 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
             </div>
         )}
 
-        {/* Main Gallery Grid with Zoom Animation */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {displayImages.map((img, idx) => (
                 <div 
                     key={img.id} 
                     className="aspect-square overflow-hidden rounded-lg cursor-pointer group relative shadow-md border border-f-blue hover:border-f-pink transition-colors opacity-0 animate-zoom-in"
-                    style={{ animationDelay: `${Math.min(idx * 0.1, 1)}s` }} // Cap delay
+                    style={{ animationDelay: `${Math.min(idx * 0.1, 1)}s` }}
                     onClick={() => setSelectedImage(img.url)}
                 >
-                    {/* Hover Overlay */}
                     <div className="absolute inset-0 bg-f-purple/60 transition-colors z-10 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 gap-4">
                         <ImagePlus className="text-white drop-shadow-lg" size={32} />
                         
-                        {/* Admin Replace Button */}
                         {isAdmin && (
                             <div onClick={(e) => e.stopPropagation()}>
                                 <input 
@@ -306,7 +323,6 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
             </div>
         )}
 
-        {/* Lightbox */}
         {selectedImage && (
             <div 
                 className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 backdrop-blur-md"
@@ -323,7 +339,6 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                         className="max-w-full max-h-[80vh] rounded-sm border border-f-white/20 shadow-2xl" 
                     />
                     <div className="flex justify-center mt-6">
-                        {/* Download Logic: Guests can download guest photos, Admins can download all. Official photos restricted for guests. */}
                         {canDownload ? (
                             <button 
                                 onClick={() => handleDownload(selectedImage)}
@@ -341,7 +356,6 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
             </div>
         )}
 
-        {/* QR Code Modal */}
         {showQrCode && (
             <div 
                 className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm"
@@ -362,7 +376,6 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                     <p className="text-gray-600 mb-6 text-sm">Guests can scan this to upload photos or view the gallery.</p>
                     
                     <div className="flex justify-center mb-6">
-                        {/* Using QuickChart API for reliable QR generation */}
                         <img 
                             src={qrCodeUrl}
                             alt="Scan QR" 
@@ -377,7 +390,6 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
             </div>
         )}
 
-        {/* Welcome Guest / Scan Action Modal */}
         {showScanOptions && (
             <div 
                 className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 backdrop-blur-md"
@@ -407,8 +419,7 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                         <button 
                             onClick={() => {
                                 setShowScanOptions(false);
-                                setActiveTab('guest'); // Switch to guest tab so they can see downloads
-                                // Scroll to gallery
+                                setActiveTab('guest');
                                 document.getElementById('gallery')?.scrollIntoView({ behavior: 'smooth' });
                             }}
                             className="w-full flex items-center justify-center gap-3 bg-f-purple/50 hover:bg-f-purple border border-f-white/20 text-f-white py-4 rounded-xl font-bold text-lg transition-colors"
