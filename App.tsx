@@ -13,7 +13,7 @@ import { MusicPlayer } from './components/MusicPlayer';
 import { SiteContent, Wish, Theme, TimelineItem } from './types';
 import { Editable } from './components/Editable';
 import { QRCodePage } from './components/QRCodePage';
-import { QRCode } from 'qrcode.react';
+import { QRCodeSVG } from 'qrcode.react';
 
 // Default Data Constants
 const DEFAULT_CONTENT: SiteContent = {
@@ -428,7 +428,7 @@ export default function App() {
             <h3 className="font-serif text-2xl text-f-pink mb-4">Share Your Photos</h3>
             <div className="flex justify-center">
                 <div className="bg-white p-4 rounded-lg">
-                    <QRCode value={window.location.origin + '/qr'} size={128} />
+                    <QRCodeSVG value={window.location.origin + '/qr'} size={128} />
                 </div>
             </div>
             <p className="text-f-white/80 mt-4">Scan the QR code to upload or download photos from the event.</p>
