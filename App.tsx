@@ -9,6 +9,7 @@ import { MapPin, Calendar, Clock, Heart, Phone, Mail, Music, ExternalLink, Downl
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import { AdminPanel } from './components/AdminPanel';
+import { MusicPlayer } from './components/MusicPlayer';
 import { SiteContent, Wish, Theme, TimelineItem } from './types';
 import { Editable } from './components/Editable';
 
@@ -162,6 +163,7 @@ export default function App() {
   return (
     <div className="font-sans text-f-white bg-f-purple min-h-screen transition-colors duration-500">
       <Header />
+      <MusicPlayer />
       
       <AdminPanel 
         isAdmin={isAdmin} 
