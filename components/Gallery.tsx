@@ -44,9 +44,12 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                     isUserUploaded: false,
                     timestamp: Date.now()
                 }));
-                // We don't save defaults to DB automatically to save space, or we can.
-                // Let's keep them in state.
                 setImages(initialItems);
+                // CRITICAL: Persist defaults so they don't vanish when a user adds a photo later
+                // We use a loop to ensure all are saved
+                for (const item of initialItems) {
+                    await imageDB.save(item);
+                }
             }
         } catch (e) {
             console.error("Failed to load images", e);
@@ -81,6 +84,14 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
     let processedCount = 0;
     const newItems: GalleryItem[] = [];
 
+    // Determine target category:
+    // If Admin is on "Official" tab, it goes to official.
+    // Otherwise (Guest or Admin on Guest tab), it goes to user uploads.
+    const isTargetOfficial = isAdmin && activeTab === 'official';
+    
+    // Admin uploads are auto-approved
+    const targetStatus = isAdmin ? 'approved' : 'pending';
+
     const filePromises = Array.from(files).map(file => {
         return new Promise<void>((resolve) => {
             if (!file.type.startsWith('image/')) {
@@ -92,8 +103,8 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                 const item: GalleryItem = {
                     id: Date.now() + Math.random(),
                     url: reader.result as string,
-                    status: isAdmin ? 'approved' : 'pending',
-                    isUserUploaded: true,
+                    status: targetStatus,
+                    isUserUploaded: !isTargetOfficial, 
                     timestamp: Date.now()
                 };
                 newItems.push(item);
@@ -109,9 +120,21 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
 
     setImages(prev => [...newItems, ...prev]);
     setIsUploading(false);
-    setUploadMessage(isAdmin ? `Added ${newItems.length} photos.` : `Uploaded ${newItems.length} photos! Awaiting approval.`);
+    
+    if (isTargetOfficial) {
+        setUploadMessage(`Added ${newItems.length} photos to Official Highlights.`);
+    } else if (isAdmin) {
+        setUploadMessage(`Added ${newItems.length} photos to Guest Gallery.`);
+    } else {
+        setUploadMessage(`Uploaded ${newItems.length} photos! Awaiting approval.`);
+    }
+    
     setTimeout(() => setUploadMessage(null), 4000);
-    setActiveTab('guest');
+    
+    // Switch tab only if we uploaded as a guest or admin intended for guest tab
+    if (!isTargetOfficial) {
+        setActiveTab('guest');
+    }
   };
 
   const handleReplaceImage = async (e: React.ChangeEvent<HTMLInputElement>, id: string | number) => {
@@ -123,8 +146,8 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
             setImages(prev => prev.map(img => {
                 if (img.id === id) {
                     const updated = { ...img, url: newUrl };
-                    // If it's a DB item (not string id usually, but let's just try saving)
-                    imageDB.save(updated).catch(err => console.log('Could not save replaced image to DB (might be default)', err));
+                    // Save update to DB
+                    imageDB.save(updated).catch(err => console.log('Could not save replaced image to DB', err));
                     return updated;
                 }
                 return img;
@@ -201,7 +224,14 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                             : 'bg-f-blue text-f-pink border border-f-pink hover:bg-f-pink hover:text-f-white glass'
                         }`}
                     >
-                        {isUploading ? <span className="animate-pulse">Uploading...</span> : <><Upload size={18} /> {isAdmin ? 'Bulk Upload' : 'Upload Photos'}</>}
+                        {isUploading ? (
+                            <span className="animate-pulse">Uploading...</span>
+                        ) : (
+                            <>
+                                <Upload size={18} /> 
+                                {isAdmin ? (activeTab === 'official' ? 'Add to Highlights' : 'Add to Guest Gallery') : 'Upload Photos'}
+                            </>
+                        )}
                     </label>
                 </div>
 
@@ -304,6 +334,17 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                                 </label>
                             </div>
                         )}
+                        {isAdmin && (
+                             <button 
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    rejectPhoto(img.id);
+                                }}
+                                className="bg-red-600 text-white text-xs px-3 py-1 rounded-full hover:bg-white hover:text-red-600 transition-colors shadow-lg flex items-center gap-1"
+                             >
+                                <Trash2 size={12} /> Delete
+                             </button>
+                        )}
                     </div>
 
                     <img 
@@ -320,6 +361,7 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
             <div className="text-f-white/60 italic py-12 border-2 border-dashed border-f-white/20 rounded-xl bg-f-blue/10 animate-fade-in-up">
                 <p className="mb-2">No photos in this section yet.</p>
                 {activeTab === 'guest' && <p>Be the first to upload one!</p>}
+                {isAdmin && activeTab === 'official' && <p>Click "Add to Highlights" to add photos.</p>}
             </div>
         )}
 
