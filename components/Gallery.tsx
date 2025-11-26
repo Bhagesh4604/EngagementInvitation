@@ -28,35 +28,46 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
   // State for QR Scan Landing Modal
   const [showScanOptions, setShowScanOptions] = useState(false);
 
+  const loadImages = async () => {
+      try {
+          const stored = await imageDB.getAll();
+          if (stored && stored.length > 0) {
+              setImages(stored);
+          } else {
+              // Initial load of default images if DB is empty
+              console.log("Seeding default images...");
+              const initialItems: GalleryItem[] = defaultImages.map((url, idx) => ({
+                  id: `def-${idx}`,
+                  url,
+                  status: 'approved',
+                  isUserUploaded: false,
+                  timestamp: Date.now()
+              }));
+              
+              // CRITICAL: Persist defaults immediately
+              for (const item of initialItems) {
+                  await imageDB.save(item);
+              }
+              setImages(initialItems);
+          }
+      } catch (e) {
+          console.error("Failed to load images", e);
+      }
+  };
+
   // Load images from DB on mount
   useEffect(() => {
-    const loadImages = async () => {
-        try {
-            const stored = await imageDB.getAll();
-            if (stored && stored.length > 0) {
-                setImages(stored);
-            } else {
-                // Initial load of default images if DB is empty
-                console.log("Seeding default images...");
-                const initialItems: GalleryItem[] = defaultImages.map((url, idx) => ({
-                    id: `def-${idx}`,
-                    url,
-                    status: 'approved',
-                    isUserUploaded: false,
-                    timestamp: Date.now()
-                }));
-                
-                // CRITICAL: Persist defaults immediately
-                for (const item of initialItems) {
-                    await imageDB.save(item);
-                }
-                setImages(initialItems);
-            }
-        } catch (e) {
-            console.error("Failed to load images", e);
-        }
-    };
     loadImages();
+
+    const handleFocus = () => {
+      loadImages();
+    };
+
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   // Check URL for scan action on mount
@@ -176,26 +187,13 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
     await imageDB.delete(id);
   };
 
-  const handleDownload = async (url: string) => {
-    try {
-        const response = await fetch(url);
-        const blob = await response.blob();
-        const blobUrl = window.URL.createObjectURL(blob);
-        
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.download = `Siddharam-Swapna-Event-${Date.now()}.jpg`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(blobUrl);
-    } catch (error) {
-        console.error("Download failed", error);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `Siddharam-Swapna-${Date.now()}.jpg`;
-        link.click();
-    }
+  const handleDownload = (url: string) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.download = `Siddharam-Swapna-Event-${Date.now()}.jpg`;
+    link.click();
   };
 
   const canDownload = isAdmin || (activeTab === 'guest');
@@ -320,10 +318,9 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                     key={img.id} 
                     className="aspect-square overflow-hidden rounded-lg cursor-pointer group relative shadow-md border border-f-blue hover:border-f-pink transition-colors opacity-0 animate-zoom-in"
                     style={{ animationDelay: `${Math.min(idx * 0.1, 1)}s` }}
-                    onClick={() => setSelectedImage(img.url)}
                 >
-                    <div className="absolute inset-0 bg-f-purple/60 transition-colors z-10 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 gap-4">
-                        <ImagePlus className="text-white drop-shadow-lg" size={32} />
+                    <div className="absolute inset-0 bg-f-purple/60 transition-colors z-10 flex flex-col items-center justify-center opacity-100 gap-4">
+                        <button onClick={() => setSelectedImage(img.url)}><ImagePlus className="text-white drop-shadow-lg" size={32} /></button>
                         
                         {isAdmin && (
                             <div onClick={(e) => e.stopPropagation()}>
@@ -352,6 +349,14 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                              >
                                 <Trash2 size={12} /> Delete
                              </button>
+                        )}
+                        {canDownload && (
+                            <button 
+                                onClick={() => handleDownload(img.url)}
+                                className="flex items-center gap-2 bg-f-orange hover:bg-white hover:text-f-orange text-white px-4 py-2 rounded-full font-bold transition-all shadow-lg hover:shadow-f-orange/50"
+                            >
+                                <Download size={16} />
+                            </button>
                         )}
                     </div>
 
