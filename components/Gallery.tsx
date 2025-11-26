@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Upload, Shield, Check, Trash2, ImagePlus, RefreshCcw, Download, QrCode, Grid, Users, Camera, Lock } from 'lucide-react';
 import { GalleryItem } from '../types';
-<<<<<<< HEAD
 import { imageDB } from '../utils'; // Keep imageDB import
-=======
->>>>>>> cbdda10 (QR)
 
 const defaultImages = [
     "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800&auto=format&fit=crop",
@@ -20,19 +17,7 @@ interface GalleryProps {
 }
 
 export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
-<<<<<<< HEAD
   const [images, setImages] = useState<GalleryItem[]>([]);
-=======
-  const [images, setImages] = useState<GalleryItem[]>(
-    defaultImages.map((url, idx) => ({
-      id: `def-${idx}`,
-      url,
-      status: 'approved',
-      isUserUploaded: false,
-      timestamp: Date.now()
-    }))
-  );
->>>>>>> cbdda10 (QR)
   
   const [activeTab, setActiveTab] = useState<'official' | 'guest'>('official');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -43,7 +28,6 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
   // State for QR Scan Landing Modal
   const [showScanOptions, setShowScanOptions] = useState(false);
 
-<<<<<<< HEAD
   // Load images from DB on mount
   useEffect(() => {
     const loadImages = async () => {
@@ -75,45 +59,27 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
     loadImages();
   }, []);
 
-=======
->>>>>>> cbdda10 (QR)
   // Check URL for scan action on mount
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('action') === 'scan') {
       setShowScanOptions(true);
-<<<<<<< HEAD
       // Clean URL without reloading
-=======
-      // Clean URL without reloading to remove the query param
->>>>>>> cbdda10 (QR)
       const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
       window.history.replaceState({}, '', newUrl);
     }
   }, []);
 
-<<<<<<< HEAD
   const cleanBaseUrl = window.location.href.split('?')[0];
   const qrCodeData = `${cleanBaseUrl}?action=scan`;
   const qrCodeUrl = `https://quickchart.io/qr?text=${encodeURIComponent(qrCodeData)}&size=300&ecLevel=H&margin=2&dark=000000&light=ffffff`;
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-=======
-  // Generate a clean URL for the QR code
-  // We strip search params to ensure the QR code is clean and then append our specific action
-  const cleanBaseUrl = window.location.href.split('?')[0];
-  const qrCodeData = `${cleanBaseUrl}?action=scan`;
-  // Use QuickChart API for robust rendering with High Error Correction (ecLevel=H)
-  const qrCodeUrl = `https://quickchart.io/qr?text=${encodeURIComponent(qrCodeData)}&size=300&ecLevel=H&margin=2&dark=000000&light=ffffff`;
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
->>>>>>> cbdda10 (QR)
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     setIsUploading(true);
     setUploadMessage(null);
-<<<<<<< HEAD
     setShowScanOptions(false);
     
     let processedCount = 0;
@@ -191,57 +157,11 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                 }
                 return img;
             }));
-=======
-    setShowScanOptions(false); // Close scan modal if open
-
-    let processedCount = 0;
-    const newItems: GalleryItem[] = [];
-
-    Array.from(files).forEach(file => {
-        if (!file.type.startsWith('image/')) {
-            processedCount++;
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            newItems.push({
-                id: Date.now() + Math.random(),
-                url: reader.result as string,
-                status: isAdmin ? 'approved' : 'pending',
-                isUserUploaded: true,
-                timestamp: Date.now()
-            });
-            
-            processedCount++;
-            if (processedCount === files.length) {
-                setImages(prev => [...newItems, ...prev]);
-                setIsUploading(false);
-                setUploadMessage(isAdmin ? `Added ${newItems.length} photos.` : `Uploaded ${newItems.length} photos! Awaiting approval.`);
-                setTimeout(() => setUploadMessage(null), 4000);
-                
-                // Automatically switch to guest tab if uploading
-                setActiveTab('guest');
-            }
-        };
-        // Use readAsDataURL to keep original quality logic (Base64)
-        reader.readAsDataURL(file);
-    });
-  };
-
-  const handleReplaceImage = (e: React.ChangeEvent<HTMLInputElement>, id: string | number) => {
-    const file = e.target.files?.[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setImages(prev => prev.map(img => img.id === id ? { ...img, url: reader.result as string } : img));
->>>>>>> cbdda10 (QR)
         };
         reader.readAsDataURL(file);
     }
   };
 
-<<<<<<< HEAD
   const approvePhoto = async (id: string | number) => {
     const item = images.find(img => img.id === id);
     if (item) {
@@ -254,23 +174,10 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
   const rejectPhoto = async (id: string | number) => {
     setImages(prev => prev.filter(img => img.id !== id));
     await imageDB.delete(id);
-=======
-  const approvePhoto = (id: string | number) => {
-    setImages(prev => prev.map(img => img.id === id ? { ...img, status: 'approved' } : img));
-  };
-
-  const rejectPhoto = (id: string | number) => {
-    setImages(prev => prev.filter(img => img.id !== id));
->>>>>>> cbdda10 (QR)
   };
 
   const handleDownload = async (url: string) => {
     try {
-<<<<<<< HEAD
-=======
-        // Fetch the Base64/URL content to a blob to force download logic
-        // This ensures the browser downloads the original file data rather than just opening the link
->>>>>>> cbdda10 (QR)
         const response = await fetch(url);
         const blob = await response.blob();
         const blobUrl = window.URL.createObjectURL(blob);
@@ -284,10 +191,6 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
         window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
         console.error("Download failed", error);
-<<<<<<< HEAD
-=======
-        // Fallback for simple URLs
->>>>>>> cbdda10 (QR)
         const link = document.createElement('a');
         link.href = url;
         link.download = `Siddharam-Swapna-${Date.now()}.jpg`;
@@ -295,23 +198,12 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
     }
   };
 
-<<<<<<< HEAD
   const canDownload = isAdmin || (activeTab === 'guest');
 
   const approvedImages = images.filter(img => img.status === 'approved');
   const officialCount = approvedImages.filter(img => !img.isUserUploaded).length;
   const guestCount = approvedImages.filter(img => img.isUserUploaded).length;
 
-=======
-  // Permission Logic:
-  // Admin can download anything.
-  // Guests can download FROM GUEST TAB ONLY.
-  // Guests CANNOT download from Official Tab.
-  const canDownload = isAdmin || (activeTab === 'guest');
-
-  // Filtering Logic
-  const approvedImages = images.filter(img => img.status === 'approved');
->>>>>>> cbdda10 (QR)
   const displayImages = activeTab === 'official' 
       ? approvedImages.filter(img => !img.isUserUploaded)
       : approvedImages.filter(img => img.isUserUploaded);
@@ -320,14 +212,7 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
 
   return (
     <div className="space-y-8 relative">
-<<<<<<< HEAD
         <div className="flex flex-col gap-6 mb-8">
-=======
-        {/* Controls Bar */}
-        <div className="flex flex-col gap-6 mb-8">
-             
-             {/* Action Buttons */}
->>>>>>> cbdda10 (QR)
              <div className="flex flex-wrap justify-center items-center gap-4">
                 <div className="relative">
                     <input 
@@ -335,11 +220,7 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                         id="photo-upload" 
                         className="hidden" 
                         accept="image/*"
-<<<<<<< HEAD
                         multiple 
-=======
-                        multiple // Allow multiple files
->>>>>>> cbdda10 (QR)
                         onChange={handleFileUpload}
                         disabled={isUploading}
                     />
@@ -351,7 +232,6 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                             : 'bg-f-blue text-f-pink border border-f-pink hover:bg-f-pink hover:text-f-white glass'
                         }`}
                     >
-<<<<<<< HEAD
                         {isUploading ? (
                             <span className="animate-pulse">Uploading...</span>
                         ) : (
@@ -360,9 +240,6 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                                 {isAdmin ? (activeTab === 'official' ? 'Add to Highlights' : 'Add to Guest Gallery') : 'Upload Photos'}
                             </>
                         )}
-=======
-                        {isUploading ? <span className="animate-pulse">Uploading...</span> : <><Upload size={18} /> {isAdmin ? 'Bulk Upload' : 'Upload Photos'}</>}
->>>>>>> cbdda10 (QR)
                     </label>
                 </div>
 
@@ -374,10 +251,6 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                 </button>
              </div>
 
-<<<<<<< HEAD
-=======
-             {/* Tabs */}
->>>>>>> cbdda10 (QR)
              <div className="flex justify-center">
                  <div className="flex bg-f-blue/30 p-1 rounded-full glass border border-f-pink/20">
                      <button 
@@ -386,11 +259,7 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                             activeTab === 'official' ? 'bg-f-pink text-white shadow-md' : 'text-f-white hover:text-f-pink'
                         }`}
                      >
-<<<<<<< HEAD
                          <Grid size={16} /> Official Highlights ({officialCount})
-=======
-                         <Grid size={16} /> Official Highlights
->>>>>>> cbdda10 (QR)
                      </button>
                      <button 
                         onClick={() => setActiveTab('guest')}
@@ -398,11 +267,7 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                             activeTab === 'guest' ? 'bg-f-pink text-white shadow-md' : 'text-f-white hover:text-f-pink'
                         }`}
                      >
-<<<<<<< HEAD
                          <Users size={16} /> Guest Uploads ({guestCount})
-=======
-                         <Users size={16} /> Guest Uploads
->>>>>>> cbdda10 (QR)
                      </button>
                  </div>
              </div>
@@ -416,10 +281,6 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
             </div>
         )}
 
-<<<<<<< HEAD
-=======
-        {/* Moderation Queue (Admin Only) */}
->>>>>>> cbdda10 (QR)
         {isAdmin && pendingImages.length > 0 && (
             <div className="bg-f-blue/40 border-2 border-f-orange/30 rounded-xl p-6 mb-8 animate-fade-in-up glass">
                 <h3 className="text-f-orange font-serif text-2xl mb-4 flex items-center justify-center gap-2">
@@ -453,32 +314,17 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
             </div>
         )}
 
-<<<<<<< HEAD
-=======
-        {/* Main Gallery Grid with Zoom Animation */}
->>>>>>> cbdda10 (QR)
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {displayImages.map((img, idx) => (
                 <div 
                     key={img.id} 
                     className="aspect-square overflow-hidden rounded-lg cursor-pointer group relative shadow-md border border-f-blue hover:border-f-pink transition-colors opacity-0 animate-zoom-in"
-<<<<<<< HEAD
                     style={{ animationDelay: `${Math.min(idx * 0.1, 1)}s` }}
                     onClick={() => setSelectedImage(img.url)}
                 >
                     <div className="absolute inset-0 bg-f-purple/60 transition-colors z-10 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 gap-4">
                         <ImagePlus className="text-white drop-shadow-lg" size={32} />
                         
-=======
-                    style={{ animationDelay: `${Math.min(idx * 0.1, 1)}s` }} // Cap delay
-                    onClick={() => setSelectedImage(img.url)}
-                >
-                    {/* Hover Overlay */}
-                    <div className="absolute inset-0 bg-f-purple/60 transition-colors z-10 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 gap-4">
-                        <ImagePlus className="text-white drop-shadow-lg" size={32} />
-                        
-                        {/* Admin Replace Button */}
->>>>>>> cbdda10 (QR)
                         {isAdmin && (
                             <div onClick={(e) => e.stopPropagation()}>
                                 <input 
@@ -496,7 +342,6 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                                 </label>
                             </div>
                         )}
-<<<<<<< HEAD
                         {isAdmin && (
                              <button 
                                 onClick={(e) => {
@@ -508,8 +353,6 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                                 <Trash2 size={12} /> Delete
                              </button>
                         )}
-=======
->>>>>>> cbdda10 (QR)
                     </div>
 
                     <img 
@@ -526,17 +369,10 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
             <div className="text-f-white/60 italic py-12 border-2 border-dashed border-f-white/20 rounded-xl bg-f-blue/10 animate-fade-in-up">
                 <p className="mb-2">No photos in this section yet.</p>
                 {activeTab === 'guest' && <p>Be the first to upload one!</p>}
-<<<<<<< HEAD
                 {isAdmin && activeTab === 'official' && <p>Click "Add to Highlights" to add photos.</p>}
             </div>
         )}
 
-=======
-            </div>
-        )}
-
-        {/* Lightbox */}
->>>>>>> cbdda10 (QR)
         {selectedImage && (
             <div 
                 className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 backdrop-blur-md"
@@ -553,10 +389,6 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                         className="max-w-full max-h-[80vh] rounded-sm border border-f-white/20 shadow-2xl" 
                     />
                     <div className="flex justify-center mt-6">
-<<<<<<< HEAD
-=======
-                        {/* Download Logic: Guests can download guest photos, Admins can download all. Official photos restricted for guests. */}
->>>>>>> cbdda10 (QR)
                         {canDownload ? (
                             <button 
                                 onClick={() => handleDownload(selectedImage)}
@@ -574,10 +406,6 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
             </div>
         )}
 
-<<<<<<< HEAD
-=======
-        {/* QR Code Modal */}
->>>>>>> cbdda10 (QR)
         {showQrCode && (
             <div 
                 className="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm"
@@ -598,10 +426,6 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                     <p className="text-gray-600 mb-6 text-sm">Guests can scan this to upload photos or view the gallery.</p>
                     
                     <div className="flex justify-center mb-6">
-<<<<<<< HEAD
-=======
-                        {/* Using QuickChart API for reliable QR generation */}
->>>>>>> cbdda10 (QR)
                         <img 
                             src={qrCodeUrl}
                             alt="Scan QR" 
@@ -616,10 +440,6 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
             </div>
         )}
 
-<<<<<<< HEAD
-=======
-        {/* Welcome Guest / Scan Action Modal */}
->>>>>>> cbdda10 (QR)
         {showScanOptions && (
             <div 
                 className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 backdrop-blur-md"
@@ -649,12 +469,7 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                         <button 
                             onClick={() => {
                                 setShowScanOptions(false);
-<<<<<<< HEAD
                                 setActiveTab('guest');
-=======
-                                setActiveTab('guest'); // Switch to guest tab so they can see downloads
-                                // Scroll to gallery
->>>>>>> cbdda10 (QR)
                                 document.getElementById('gallery')?.scrollIntoView({ behavior: 'smooth' });
                             }}
                             className="w-full flex items-center justify-center gap-3 bg-f-purple/50 hover:bg-f-purple border border-f-white/20 text-f-white py-4 rounded-xl font-bold text-lg transition-colors"
