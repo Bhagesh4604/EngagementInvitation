@@ -4,12 +4,12 @@ import { GalleryItem } from '../types';
 import { imageDB } from '../utils';
 
 const defaultImages = [
-    "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1529636798458-92182e662485?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1549417229-aa67d3263c09?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?q=80&w=800&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1532386236358-a33d8a9434e3?q=80&w=800&auto=format&fit=crop"
+    "https://picsum.photos/id/10/800/600",
+    "https://picsum.photos/id/20/800/600",
+    "https://picsum.photos/id/30/800/600",
+    "https://picsum.photos/id/40/800/600",
+    "https://picsum.photos/id/50/800/600",
+    "https://picsum.photos/id/60/800/600"
 ];
 
 interface GalleryProps {
@@ -55,18 +55,20 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
       }
   };
 
-  // Load images from DB on mount
+  // Load images from DB on mount and on 'photosUploaded' event
   useEffect(() => {
     loadImages();
 
-    const handleFocus = () => {
+    const handlePhotosUploaded = () => {
       loadImages();
     };
 
-    window.addEventListener('focus', handleFocus);
+    window.addEventListener('photosUploaded', handlePhotosUploaded);
+    window.addEventListener('focus', handlePhotosUploaded);
 
     return () => {
-      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('photosUploaded', handlePhotosUploaded);
+      window.removeEventListener('focus', handlePhotosUploaded);
     };
   }, []);
 

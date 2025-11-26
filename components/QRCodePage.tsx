@@ -3,10 +3,10 @@ import { imageDB } from '../utils';
 import { GalleryItem } from '../types';
 
 const mockPhotos = [
-  { id: 1, url: 'https://images.unsplash.com/photo-1598201214152-33e2d639c369?q=80&w=2070&auto=format&fit=crop', name: 'engagement-photo-1.jpg' },
-  { id: 2, url: 'https://images.unsplash.com/photo-1525422849539-e07d093767a6?q=80&w=2070&auto=format&fit=crop', name: 'engagement-photo-2.jpg' },
-  { id: 3, url: 'https://images.unsplash.com/photo-1543943449-9804c781e2b8?q=80&w=2070&auto=format&fit=crop', name: 'engagement-photo-3.jpg' },
-  { id: 4, url: 'https://images.unsplash.com/photo-1592394562408-da2a03c399e5?q=80&w=2070&auto=format&fit=crop', name: 'engagement-photo-4.jpg' },
+  { id: 1, url: 'https://picsum.photos/id/10/800/600', name: 'engagement-photo-1.jpg' },
+  { id: 2, url: 'https://picsum.photos/id/20/800/600', name: 'engagement-photo-2.jpg' },
+  { id: 3, url: 'https://picsum.photos/id/30/800/600', name: 'engagement-photo-3.jpg' },
+  { id: 4, url: 'https://picsum.photos/id/40/800/600', name: 'engagement-photo-4.jpg' },
 ];
 
 export function QRCodePage() {
@@ -52,31 +52,19 @@ export function QRCodePage() {
 
     await Promise.all(filePromises);
 
+    window.dispatchEvent(new Event('photosUploaded'));
+
     alert(`${selectedFiles.length} photo(s) submitted for approval!`);
     setSelectedFiles([]);
   };
 
-  const downloadImage = async (url: string, name: string) => {
-    try {
-      const response = await fetch(url);
-      const blob = await response.blob();
-      const blobUrl = window.URL.createObjectURL(blob);
-      
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.download = name;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(blobUrl);
-    } catch (error) {
-      console.error("Download failed", error);
-      // Fallback for simple URLs
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = name;
-      link.click();
-    }
+  const downloadImage = (url: string) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.download = `Siddharam-Swapna-Event-${Date.now()}.jpg`;
+    link.click();
   };
 
   return (
@@ -141,8 +129,8 @@ export function QRCodePage() {
                   className="w-full h-auto object-cover rounded-lg"
                 />
                 <button
-                  onClick={() => downloadImage(photo.url, photo.name)}
-                  className="absolute bottom-2 right-2 bg-f-orange text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => downloadImage(photo.url)}
+                  className="absolute bottom-2 right-2 bg-f-orange text-white p-2 rounded-full shadow-lg"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 </button>
