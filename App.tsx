@@ -39,6 +39,10 @@ export default function App() {
       setContent(contentData);
       setTimelineItems(timelineData);
       setWishes(wishesData);
+      if (contentData && contentData.theme) {
+        setTheme(contentData.theme);
+        document.documentElement.setAttribute('data-theme', contentData.theme);
+      }
     };
     loadData();
   }, []);
@@ -55,9 +59,14 @@ export default function App() {
   }, []);
 
   // Handle Theme Change
-  const handleThemeChange = (newTheme: Theme) => {
+  const handleThemeChange = async (newTheme: Theme) => {
     setTheme(newTheme);
     document.documentElement.setAttribute('data-theme', newTheme);
+    if (content) {
+      const newContent = { ...content, theme: newTheme };
+      setContent(newContent);
+      await api.updateContent(newContent);
+    }
   };
 
   // Handle Content Update

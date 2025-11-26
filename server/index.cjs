@@ -14,13 +14,17 @@ app.use(bodyParser.json({ limit: '50mb' }));
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '../dist')));
 
-const db = mysql.createConnection({
+const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'engagement_website',
   port: process.env.DB_PORT || 3306
-});
+};
+
+console.log('Using database config:', dbConfig);
+
+const db = mysql.createConnection(dbConfig);
 
 db.connect(err => {
   if (err) {
@@ -36,6 +40,7 @@ db.connect(err => {
 app.get('/api/content', (req, res) => {
   db.query('SELECT * FROM content', (err, result) => {
     if (err) {
+      console.error('Error fetching content:', err);
       res.status(500).send(err);
     } else {
       res.send(result[0]);
@@ -49,6 +54,7 @@ app.put('/api/content', (req, res) => {
   const sql = `UPDATE content SET ? WHERE id = 1`;
   db.query(sql, content, (err, result) => {
     if (err) {
+      console.error('Error updating content:', err);
       res.status(500).send(err);
     } else {
       res.send(result);
@@ -60,6 +66,7 @@ app.put('/api/content', (req, res) => {
 app.get('/api/timeline', (req, res) => {
   db.query('SELECT * FROM timeline', (err, result) => {
     if (err) {
+      console.error('Error fetching timeline:', err);
       res.status(500).send(err);
     } else {
       res.send(result);
@@ -73,6 +80,7 @@ app.post('/api/timeline', (req, res) => {
   const sql = `INSERT INTO timeline SET ?`;
   db.query(sql, newItem, (err, result) => {
     if (err) {
+      console.error('Error adding timeline item:', err);
       res.status(500).send(err);
     } else {
       res.send({ id: result.insertId, ...newItem });
@@ -87,6 +95,7 @@ app.put('/api/timeline/:id', (req, res) => {
   const sql = `UPDATE timeline SET ? WHERE id = ?`;
   db.query(sql, [updatedItem, id], (err, result) => {
     if (err) {
+      console.error('Error updating timeline item:', err);
       res.status(500).send(err);
     } else {
       res.send(result);
@@ -100,6 +109,7 @@ app.delete('/api/timeline/:id', (req, res) => {
   const sql = `DELETE FROM timeline WHERE id = ?`;
   db.query(sql, id, (err, result) => {
     if (err) {
+      console.error('Error deleting timeline item:', err);
       res.status(500).send(err);
     } else {
       res.send(result);
@@ -111,6 +121,7 @@ app.delete('/api/timeline/:id', (req, res) => {
 app.get('/api/wishes', (req, res) => {
   db.query('SELECT * FROM wishes ORDER BY timestamp DESC', (err, result) => {
     if (err) {
+      console.error('Error fetching wishes:', err);
       res.status(500).send(err);
     } else {
       res.send(result);
@@ -125,6 +136,7 @@ app.post('/api/wishes', (req, res) => {
   const sql = `INSERT INTO wishes SET ?`;
   db.query(sql, newWish, (err, result) => {
     if (err) {
+      console.error('Error adding wish:', err);
       res.status(500).send(err);
     } else {
       res.send({ id: result.insertId, ...newWish });
@@ -138,6 +150,7 @@ app.delete('/api/wishes/:id', (req, res) => {
     const sql = `DELETE FROM wishes WHERE id = ?`;
     db.query(sql, id, (err, result) => {
         if (err) {
+            console.error('Error deleting wish:', err);
             res.status(500).send(err);
         } else {
             res.send(result);
@@ -149,6 +162,7 @@ app.delete('/api/wishes/:id', (req, res) => {
 app.get('/api/gallery', (req, res) => {
   db.query('SELECT * FROM gallery', (err, result) => {
     if (err) {
+      console.error('Error fetching gallery:', err);
       res.status(500).send(err);
     } else {
       res.send(result);
@@ -163,6 +177,7 @@ app.post('/api/gallery', (req, res) => {
   const sql = `INSERT INTO gallery SET ?`;
   db.query(sql, newItem, (err, result) => {
     if (err) {
+      console.error('Error uploading gallery item:', err);
       res.status(500).send(err);
     } else {
       res.send({ id: result.insertId, ...newItem });
@@ -177,6 +192,7 @@ app.put('/api/gallery/:id', (req, res) => {
     const sql = `UPDATE gallery SET ? WHERE id = ?`;
     db.query(sql, [updatedItem, id], (err, result) => {
         if (err) {
+            console.error('Error updating gallery item:', err);
             res.status(500).send(err);
         } else {
             res.send(result);
@@ -190,6 +206,7 @@ app.delete('/api/gallery/:id', (req, res) => {
     const sql = `DELETE FROM gallery WHERE id = ?`;
     db.query(sql, id, (err, result) => {
         if (err) {
+            console.error('Error deleting gallery item:', err);
             res.status(500).send(err);
         } else {
             res.send(result);
