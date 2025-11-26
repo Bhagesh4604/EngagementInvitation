@@ -6,7 +6,7 @@ interface OrnamentProps {
   rotate?: boolean;
 }
 
-export const Ornament: React.FC<OrnamentProps> = ({ className = "", color = "fill-gold-400", rotate = false }) => {
+export const Ornament: React.FC<OrnamentProps> = ({ className = "", color = "fill-f-pink", rotate = false }) => {
   return (
     <div className={`flex justify-center items-center w-full py-6 ${className} ${rotate ? 'rotate-180' : ''}`}>
       <svg width="200" height="40" viewBox="0 0 200 40" className={`${color}`} xmlns="http://www.w3.org/2000/svg">
@@ -23,12 +23,12 @@ export const Ornament: React.FC<OrnamentProps> = ({ className = "", color = "fil
 
 export const MandalaPattern: React.FC<{ className?: string }> = ({ className = "" }) => (
     <svg className={`absolute opacity-10 pointer-events-none ${className}`} width="300" height="300" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="50" cy="50" r="40" stroke="#8B0000" strokeWidth="0.5"/>
-        <circle cx="50" cy="50" r="30" stroke="#D4AF37" strokeWidth="0.5"/>
-        <path d="M50 10 L55 30 L50 35 L45 30 Z" fill="#D4AF37"/>
-        <path d="M50 90 L55 70 L50 65 L45 70 Z" fill="#D4AF37"/>
-        <path d="M90 50 L70 55 L65 50 L70 45 Z" fill="#D4AF37"/>
-        <path d="M10 50 L30 55 L35 50 L30 45 Z" fill="#D4AF37"/>
-        <circle cx="50" cy="50" r="10" stroke="#8B0000" strokeWidth="0.5"/>
+        <circle cx="50" cy="50" r="40" stroke="#D174D2" strokeWidth="0.5"/>
+        <circle cx="50" cy="50" r="30" stroke="#E0563F" strokeWidth="0.5"/>
+        <path d="M50 10 L55 30 L50 35 L45 30 Z" fill="#E0563F"/>
+        <path d="M50 90 L55 70 L50 65 L45 70 Z" fill="#E0563F"/>
+        <path d="M90 50 L70 55 L65 50 L70 45 Z" fill="#E0563F"/>
+        <path d="M10 50 L30 55 L35 50 L30 45 Z" fill="#E0563F"/>
+        <circle cx="50" cy="50" r="10" stroke="#D174D2" strokeWidth="0.5"/>
     </svg>
 );

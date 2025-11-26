@@ -13,26 +13,126 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Great+Vibes&display=swap" rel="stylesheet">
 
+    <style>
+      :root {
+        /* Default Theme: Futuristic Rich (Neon) */
+        --c-bg: #2E1065;        /* Deep Violet */
+        --c-card: #4C1D95;      /* Lighter Violet/Blue */
+        --c-text: #FFFFFF;      /* White */
+        --c-accent: #D946EF;    /* Fuchsia/Pink */
+        --c-highlight: #F59E0B; /* Amber/Gold */
+        --c-overlay: rgba(46, 16, 101, 0.8);
+      }
+
+      /* Royal Theme */
+      [data-theme='royal'] {
+        --c-bg: #450a0a;        /* Red 950 */
+        --c-card: #7f1d1d;      /* Red 900 */
+        --c-text: #fff1f2;      /* Rose 50 */
+        --c-accent: #fbbf24;    /* Amber 400 (Gold) */
+        --c-highlight: #f59e0b; /* Amber 500 */
+        --c-overlay: rgba(69, 10, 10, 0.8);
+      }
+
+      /* Ocean Theme */
+      [data-theme='ocean'] {
+        --c-bg: #0f172a;        /* Slate 900 */
+        --c-card: #1e293b;      /* Slate 800 */
+        --c-text: #f0f9ff;      /* Sky 50 */
+        --c-accent: #38bdf8;    /* Sky 400 */
+        --c-highlight: #0ea5e9; /* Sky 500 */
+        --c-overlay: rgba(15, 23, 42, 0.8);
+      }
+
+      /* Forest Theme */
+      [data-theme='forest'] {
+        --c-bg: #052e16;        /* Green 950 */
+        --c-card: #14532d;      /* Green 900 */
+        --c-text: #f0fdf4;      /* Green 50 */
+        --c-accent: #4ade80;    /* Green 400 */
+        --c-highlight: #a3e635; /* Lime 400 */
+        --c-overlay: rgba(5, 46, 22, 0.8);
+      }
+
+      /* Elegant Theme (White & Gold) */
+      [data-theme='elegant'] {
+        --c-bg: #FDFBF7;        /* Warm White/Cream */
+        --c-card: #FFFFFF;      /* White */
+        --c-text: #1F2937;      /* Dark Gray */
+        --c-accent: #B8860B;    /* Dark Goldenrod (Darker for readability on white) */
+        --c-highlight: #8B0000; /* Deep Maroon */
+        --c-overlay: rgba(255, 255, 255, 0.95);
+      }
+
+      /* Sunset Theme */
+      [data-theme='sunset'] {
+        --c-bg: #431407;        /* Orange 950 */
+        --c-card: #7c2d12;      /* Orange 900 */
+        --c-text: #fff7ed;      /* Orange 50 */
+        --c-accent: #f43f5e;    /* Rose 500 */
+        --c-highlight: #fbbf24; /* Amber 400 */
+        --c-overlay: rgba(67, 20, 7, 0.8);
+      }
+
+      /* Midnight Theme */
+      [data-theme='midnight'] {
+        --c-bg: #000000;        /* Black */
+        --c-card: #18181b;      /* Zinc 900 */
+        --c-text: #e4e4e7;      /* Zinc 200 */
+        --c-accent: #6366f1;    /* Indigo 500 */
+        --c-highlight: #ec4899; /* Pink 500 */
+        --c-overlay: rgba(0, 0, 0, 0.9);
+      }
+
+      /* Custom scrollbar for webkit */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--c-bg); 
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--c-card); 
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--c-accent); 
+      }
+      
+      .glass {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      
+      /* Adjustment for light themes */
+      [data-theme='elegant'] .glass {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(184, 134, 11, 0.2);
+        box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.1);
+      }
+      
+      .text-glow {
+        text-shadow: 0 0 10px rgba(255,255,255,0.3);
+      }
+      
+      [data-theme='elegant'] .text-glow {
+         text-shadow: none;
+      }
+    </style>
+
     <script>
       tailwind.config = {
         theme: {
           extend: {
             colors: {
-              maroon: {
-                800: '#8B0000',
-                900: '#5e0000',
-              },
-              gold: {
-                100: '#F9F1D8',
-                200: '#F0E3B6',
-                300: '#E6D391',
-                400: '#D4AF37', // Classic Gold
-                500: '#C5A028',
-                600: '#B08D1E',
-              },
-              marigold: {
-                400: '#FFB300',
-                500: '#FFA000',
+              f: {
+                white: 'var(--c-text)',
+                pink: 'var(--c-accent)',
+                orange: 'var(--c-highlight)',
+                blue: 'var(--c-card)',
+                purple: 'var(--c-bg)',
               }
             },
             fontFamily: {
@@ -41,45 +141,41 @@
               script: ['"Great Vibes"', 'cursive'],
             },
             backgroundImage: {
-              'paper-texture': "url('https://www.transparenttextures.com/patterns/cream-paper.png')",
+              'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+            },
+            animation: {
+                'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                'spin-slow': 'spin 3s linear infinite',
+                'zoom-in': 'zoomIn 0.6s ease-out forwards',
+            },
+            keyframes: {
+                fadeInUp: {
+                    '0%': { opacity: '0', transform: 'translateY(20px)' },
+                    '100%': { opacity: '1', transform: 'translateY(0)' },
+                },
+                zoomIn: {
+                    '0%': { opacity: '0', transform: 'scale(0.95)' },
+                    '100%': { opacity: '1', transform: 'scale(1)' },
+                }
             }
           }
         }
       }
     </script>
-    <style>
-      /* Custom scrollbar for webkit */
-      ::-webkit-scrollbar {
-        width: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #fdf6e3; 
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #D4AF37; 
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #b08d1e; 
-      }
-      .gold-text-gradient {
-        background: linear-gradient(to right, #D4AF37, #F0E3B6, #D4AF37);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-      }
-    </style>
   <script type="importmap">
 {
   "imports": {
     "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "react": "https://aistudiocdn.com/react@^19.2.0",
     "lucide-react": "https://aistudiocdn.com/lucide-react@^0.554.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "html2canvas": "https://aistudiocdn.com/html2canvas@^1.4.1",
+    "jspdf": "https://aistudiocdn.com/jspdf@^2.5.1"
   }
 }
 </script>
 </head>
-  <body class="bg-orange-50 text-stone-800 antialiased selection:bg-marigold-400 selection:text-white">
+  <body class="bg-f-purple text-f-white antialiased selection:bg-f-pink selection:text-white transition-colors duration-500">
     <div id="root"></div>
   </body>
 </html>

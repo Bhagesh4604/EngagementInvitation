@@ -23,11 +23,11 @@ export const Header: React.FC = () => {
   return (
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-white/95 shadow-md py-2 backdrop-blur-sm' : 'bg-transparent py-4 md:py-6'
+        isScrolled ? 'bg-f-purple/95 shadow-lg shadow-f-pink/10 py-2 backdrop-blur-md' : 'bg-transparent py-4 md:py-6'
       }`}
     >
       <div className="container mx-auto px-6 flex justify-between items-center">
-        <div className={`font-script text-3xl md:text-4xl text-maroon-800 transition-opacity ${isScrolled ? 'opacity-100' : 'opacity-0 md:opacity-100'}`}>
+        <div className={`font-script text-3xl md:text-4xl text-f-pink transition-opacity ${isScrolled ? 'opacity-100' : 'opacity-0 md:opacity-100'}`}>
           S & S
         </div>
 
@@ -37,7 +37,7 @@ export const Header: React.FC = () => {
             <a 
               key={link.label} 
               href={link.href} 
-              className="text-stone-800 hover:text-maroon-800 font-serif uppercase tracking-widest text-sm font-semibold transition-colors border-b-2 border-transparent hover:border-gold-400 pb-1"
+              className="text-f-white hover:text-f-orange font-serif uppercase tracking-widest text-sm font-semibold transition-colors border-b-2 border-transparent hover:border-f-pink pb-1"
             >
               {link.label}
             </a>
@@ -46,7 +46,7 @@ export const Header: React.FC = () => {
 
         {/* Mobile Menu Toggle */}
         <button 
-          className="md:hidden text-maroon-800"
+          className="md:hidden text-f-pink hover:text-f-white transition-colors"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
@@ -54,12 +54,12 @@ export const Header: React.FC = () => {
       </div>
 
       {/* Mobile Nav Overlay */}
-      <div className={`md:hidden fixed inset-0 bg-white z-40 flex flex-col items-center justify-center space-y-8 transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+      <div className={`md:hidden fixed inset-0 bg-f-purple z-40 flex flex-col items-center justify-center space-y-8 transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         {navLinks.map((link) => (
           <a 
             key={link.label} 
             href={link.href} 
-            className="text-2xl font-serif text-maroon-800 hover:text-gold-500"
+            className="text-2xl font-serif text-f-white hover:text-f-pink"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             {link.label}

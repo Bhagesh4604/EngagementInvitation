@@ -38,7 +38,7 @@ export const Section: React.FC<SectionProps> = ({ id, children, className = "", 
     <section 
       id={id} 
       ref={sectionRef} 
-      className={`py-16 md:py-24 relative overflow-hidden ${bgClass} transition-opacity duration-1000 transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+      className={`py-16 md:py-24 relative overflow-visible ${bgClass} transition-opacity duration-1000 transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
     >
       <div className={`container mx-auto px-4 md:px-8 max-w-5xl relative z-10 ${className}`}>
         {children}
