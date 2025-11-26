@@ -477,8 +477,8 @@ export default function App() {
 
             <Ornament color="fill-f-pink" className="opacity-50 mb-8" />
             
-            <p className="text-xs text-f-white/60 uppercase tracking-widest">
-                © 2025 Siddharam & Swapna. Made with Love.
+            <p className="text-xs text-f-white/60 uppercase tracking-widest flex items-center justify-center gap-2">
+                © 2025  Made by Bhagesh <Heart size={12} fill="currentColor" className="text-f-pink" />
             </p>
         </div>
       </footer>
