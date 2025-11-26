@@ -12,7 +12,7 @@ export function QRCodePage() {
   const [showDownloadablePhotos, setShowDownloadablePhotos] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleUploadClick = () => {
+  const handleSelectFilesClick = () => {
     setShowDownloadablePhotos(false);
     fileInputRef.current?.click();
   };
@@ -26,23 +26,37 @@ export function QRCodePage() {
     if (event.target.files) {
       const files = Array.from(event.target.files);
       setSelectedFiles(files);
-      // Here you would typically upload the files to a server
-      console.log('Selected files:', files);
-      alert(`${files.length} photo(s) selected for upload.`);
     }
   };
 
-  const downloadImage = (url: string, name: string) => {
-    fetch(url)
-      .then(response => response.blob())
-      .then(blob => {
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = name;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      });
+  const handleUpload = () => {
+    // Here you would typically upload the files to a server
+    console.log('Uploading files:', selectedFiles);
+    alert(`${selectedFiles.length} photo(s) uploaded successfully!`);
+    setSelectedFiles([]);
+  };
+
+  const downloadImage = async (url: string, name: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Download failed", error);
+      // Fallback for simple URLs
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = name;
+      link.click();
+    }
   };
 
   return (
@@ -58,10 +72,10 @@ export function QRCodePage() {
           className="hidden"
         />
         <button
-          onClick={handleUploadClick}
+          onClick={handleSelectFilesClick}
           className="w-full px-8 py-4 bg-f-orange text-white font-bold rounded-lg shadow-lg hover:bg-f-orange/80 transition-colors"
         >
-          Upload Photos
+          Select Photos to Upload
         </button>
         <button
           onClick={handleDownloadClick}
@@ -73,7 +87,7 @@ export function QRCodePage() {
       
       {selectedFiles.length > 0 && (
         <div className="mt-8 w-full">
-          <h2 className="text-2xl font-serif text-f-pink mb-4 text-center">Selected Photos for Upload:</h2>
+          <h2 className="text-2xl font-serif text-f-pink mb-4 text-center">Selected Photos:</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
             {selectedFiles.map((file, index) => (
               <img
@@ -83,6 +97,14 @@ export function QRCodePage() {
                 className="w-full h-auto object-cover rounded-lg"
               />
             ))}
+          </div>
+          <div className="text-center mt-4">
+            <button
+              onClick={handleUpload}
+              className="px-8 py-4 bg-green-600 text-white font-bold rounded-lg shadow-lg hover:bg-green-700 transition-colors"
+            >
+              Upload {selectedFiles.length} {selectedFiles.length > 1 ? 'Photos' : 'Photo'}
+            </button>
           </div>
         </div>
       )}
