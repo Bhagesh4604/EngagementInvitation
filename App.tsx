@@ -249,7 +249,7 @@ export default function App() {
                     <button 
                         onClick={handleDownloadPDF}
                         disabled={isGeneratingPdf}
-                        className="flex items-center justify-center gap-2 text-sm font-bold text-white bg-f-orange hover:bg-f-orange/80 py-2 px-4 rounded transition-colors disabled:opacity-50 disabled:cursor-wait shadow-lg shadow-f-orange/20"
+                        className="flex items-center justify-center gap-2 text-sm font-bold text-f-purple bg-f-orange hover:bg-f-orange/80 py-2 px-4 rounded transition-colors disabled:opacity-50 disabled:cursor-wait shadow-lg shadow-f-orange/20"
                     >
                         <Download size={14} />
                         {isGeneratingPdf ? 'Generating...' : 'Download Invite'}

@@ -35,21 +35,23 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
   // State for QR Scan Landing Modal
   const [showScanOptions, setShowScanOptions] = useState(false);
 
-  // Check URL for scan action
+  // Check URL for scan action on mount
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('action') === 'scan') {
       setShowScanOptions(true);
-      // Clean URL without reloading
+      // Clean URL without reloading to remove the query param
       const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
       window.history.replaceState({}, '', newUrl);
     }
   }, []);
 
-  // Generate a clean URL for the QR code that includes the query param
-  const baseUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-  const qrCodeData = `${baseUrl}?action=scan`;
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrCodeData)}&color=000000&bgcolor=ffffff&margin=10`;
+  // Generate a clean URL for the QR code
+  // We strip search params to ensure the QR code is clean and then append our specific action
+  const cleanBaseUrl = window.location.href.split('?')[0];
+  const qrCodeData = `${cleanBaseUrl}?action=scan`;
+  // Use QuickChart API for robust rendering with High Error Correction (ecLevel=H)
+  const qrCodeUrl = `https://quickchart.io/qr?text=${encodeURIComponent(qrCodeData)}&size=300&ecLevel=H&margin=2&dark=000000&light=ffffff`;
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -116,6 +118,7 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
   const handleDownload = async (url: string) => {
     try {
         // Fetch the Base64/URL content to a blob to force download logic
+        // This ensures the browser downloads the original file data rather than just opening the link
         const response = await fetch(url);
         const blob = await response.blob();
         const blobUrl = window.URL.createObjectURL(blob);
@@ -129,7 +132,7 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
         window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
         console.error("Download failed", error);
-        // Fallback
+        // Fallback for simple URLs
         const link = document.createElement('a');
         link.href = url;
         link.download = `Siddharam-Swapna-${Date.now()}.jpg`;
@@ -139,9 +142,9 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
 
   // Permission Logic:
   // Admin can download anything.
-  // Guests can download from Guest Tab.
-  // Guests CANNOT download from Official Tab (unless Admin).
-  const canDownload = isAdmin || activeTab === 'guest';
+  // Guests can download FROM GUEST TAB ONLY.
+  // Guests CANNOT download from Official Tab.
+  const canDownload = isAdmin || (activeTab === 'guest');
 
   // Filtering Logic
   const approvedImages = images.filter(img => img.status === 'approved');
@@ -329,8 +332,8 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                                 <Download size={20} /> Download Original
                             </button>
                         ) : (
-                            <div className="flex items-center gap-2 bg-gray-700/50 text-gray-300 px-6 py-2 rounded-full border border-gray-600">
-                                <Lock size={16} /> Download Restricted
+                            <div className="flex items-center gap-2 bg-gray-700/80 text-gray-200 px-6 py-2 rounded-full border border-gray-600 font-bold backdrop-blur-sm">
+                                <Lock size={16} /> Admin Only Download
                             </div>
                         )}
                     </div>
@@ -359,6 +362,7 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                     <p className="text-gray-600 mb-6 text-sm">Guests can scan this to upload photos or view the gallery.</p>
                     
                     <div className="flex justify-center mb-6">
+                        {/* Using QuickChart API for reliable QR generation */}
                         <img 
                             src={qrCodeUrl}
                             alt="Scan QR" 
@@ -366,7 +370,9 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                         />
                     </div>
                     
-                    <p className="text-xs text-gray-400 font-mono break-all line-clamp-1">{baseUrl}</p>
+                    <div className="bg-gray-100 p-2 rounded text-xs text-gray-500 font-mono break-all line-clamp-2">
+                        {cleanBaseUrl}
+                    </div>
                 </div>
             </div>
         )}
@@ -407,7 +413,7 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                             }}
                             className="w-full flex items-center justify-center gap-3 bg-f-purple/50 hover:bg-f-purple border border-f-white/20 text-f-white py-4 rounded-xl font-bold text-lg transition-colors"
                         >
-                            <Download size={24} /> Download Photos
+                            <Download size={24} /> View & Download
                         </button>
                     </div>
                 </div>
