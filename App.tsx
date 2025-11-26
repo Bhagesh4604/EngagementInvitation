@@ -42,6 +42,7 @@ export default function App() {
   const [isAdmin, setIsAdmin] = useState(false);
   
   // Initialize State from Storage or Defaults
+  // Using a function in useState ensures this only runs once on mount
   const [theme, setTheme] = useState<Theme>(() => storage.load<Theme>('site_theme', 'elegant'));
   const [content, setContent] = useState<SiteContent>(() => storage.load<SiteContent>('site_content', DEFAULT_CONTENT));
   const [timelineItems, setTimelineItems] = useState<TimelineItem[]>(() => storage.load<TimelineItem[]>('site_timeline', DEFAULT_TIMELINE));
@@ -55,6 +56,7 @@ export default function App() {
   // Persist State Changes
   useEffect(() => {
     storage.save('site_theme', theme);
+    // Apply theme to document immediately when it changes
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
@@ -70,7 +72,7 @@ export default function App() {
     storage.save('site_wishes', wishes);
   }, [wishes]);
 
-  // Initial Theme Set
+  // Initial Theme Set (Safety check)
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
   }, []);
@@ -158,7 +160,7 @@ export default function App() {
   };
 
   return (
-    <div className="font-sans text-f-white bg-f-purple min-h-screen">
+    <div className="font-sans text-f-white bg-f-purple min-h-screen transition-colors duration-500">
       <Header />
       
       <AdminPanel 

@@ -37,6 +37,7 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                 setImages(stored);
             } else {
                 // Initial load of default images if DB is empty
+                console.log("Seeding default images...");
                 const initialItems: GalleryItem[] = defaultImages.map((url, idx) => ({
                     id: `def-${idx}`,
                     url,
@@ -44,12 +45,12 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                     isUserUploaded: false,
                     timestamp: Date.now()
                 }));
-                setImages(initialItems);
-                // CRITICAL: Persist defaults so they don't vanish when a user adds a photo later
-                // We use a loop to ensure all are saved
+                
+                // CRITICAL: Persist defaults immediately
                 for (const item of initialItems) {
                     await imageDB.save(item);
                 }
+                setImages(initialItems);
             }
         } catch (e) {
             console.error("Failed to load images", e);
@@ -108,8 +109,12 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                     timestamp: Date.now()
                 };
                 newItems.push(item);
-                // Save to DB
-                await imageDB.save(item);
+                // Save to DB immediately
+                try {
+                    await imageDB.save(item);
+                } catch(err) {
+                    console.error("Failed to save image", err);
+                }
                 resolve();
             };
             reader.readAsDataURL(file);
@@ -118,7 +123,7 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
 
     await Promise.all(filePromises);
 
-    setImages(prev => [...newItems, ...prev]);
+    setImages(prev => [...prev, ...newItems]); // Append new items to previous state
     setIsUploading(false);
     
     if (isTargetOfficial) {
@@ -196,6 +201,9 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
   const canDownload = isAdmin || (activeTab === 'guest');
 
   const approvedImages = images.filter(img => img.status === 'approved');
+  const officialCount = approvedImages.filter(img => !img.isUserUploaded).length;
+  const guestCount = approvedImages.filter(img => img.isUserUploaded).length;
+
   const displayImages = activeTab === 'official' 
       ? approvedImages.filter(img => !img.isUserUploaded)
       : approvedImages.filter(img => img.isUserUploaded);
@@ -251,7 +259,7 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                             activeTab === 'official' ? 'bg-f-pink text-white shadow-md' : 'text-f-white hover:text-f-pink'
                         }`}
                      >
-                         <Grid size={16} /> Official Highlights
+                         <Grid size={16} /> Official Highlights ({officialCount})
                      </button>
                      <button 
                         onClick={() => setActiveTab('guest')}
@@ -259,7 +267,7 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                             activeTab === 'guest' ? 'bg-f-pink text-white shadow-md' : 'text-f-white hover:text-f-pink'
                         }`}
                      >
-                         <Users size={16} /> Guest Uploads
+                         <Users size={16} /> Guest Uploads ({guestCount})
                      </button>
                  </div>
              </div>
