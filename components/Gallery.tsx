@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Upload, Shield, Check, Trash2, ImagePlus, RefreshCcw, Download, QrCode, Grid, Users, Camera, Lock } from 'lucide-react';
 import { GalleryItem } from '../types';
-import { imageDB } from '../utils';
+import { imageDB } from '../utils'; // Keep imageDB import
 
 const defaultImages = [
     "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=800&auto=format&fit=crop",
@@ -81,7 +81,7 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
     setIsUploading(true);
     setUploadMessage(null);
     setShowScanOptions(false);
-
+    
     let processedCount = 0;
     const newItems: GalleryItem[] = [];
 

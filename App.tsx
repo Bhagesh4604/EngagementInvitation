@@ -12,6 +12,8 @@ import { AdminPanel } from './components/AdminPanel';
 import { MusicPlayer } from './components/MusicPlayer';
 import { SiteContent, Wish, Theme, TimelineItem } from './types';
 import { Editable } from './components/Editable';
+import { QRCodePage } from './components/QRCodePage';
+import QRCode from 'qrcode.react';
 
 // Default Data Constants
 const DEFAULT_CONTENT: SiteContent = {
@@ -41,6 +43,7 @@ export default function App() {
   const printRef = useRef<HTMLDivElement>(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [route, setRoute] = useState('/');
   
   // Initialize State from Storage or Defaults
   // Using a function in useState ensures this only runs once on mount
@@ -78,6 +81,17 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', theme);
   }, []);
 
+  useEffect(() => {
+    const handlePopState = () => {
+      setRoute(window.location.pathname);
+    };
+    window.addEventListener('popstate', handlePopState);
+    setRoute(window.location.pathname);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, []);
+
   // Handle Theme Change
   const handleThemeChange = (newTheme: Theme) => {
     setTheme(newTheme);
@@ -89,9 +103,9 @@ export default function App() {
   };
 
   const resetHeroBg = () => {
-      setContent(prev => ({ 
+      setContent(prev => ({
           ...prev, 
-          heroBgUrl: 'https://images.unsplash.com/photo-1621621667797-e06afc21085c?q=80&w=2000&auto=format&fit=crop' 
+          heroBgUrl: 'https://images.unsplash.com/photo-1621621667797-e06afc21085c?q=80&w=2000&auto=format&fit=crop'
       }));
   };
 
@@ -159,6 +173,10 @@ export default function App() {
         setIsGeneratingPdf(false);
     }
   };
+
+  if (route === '/qr') {
+    return <QRCodePage />;
+  }
 
   return (
     <div className="font-sans text-f-white bg-f-purple min-h-screen transition-colors duration-500">
@@ -391,8 +409,8 @@ export default function App() {
                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3801.077285328409!2d76.123456!3d17.123456!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTfCsDA3JzM0LjQiTiA3NsKwMDcnMjQuNCJF!5e0!3m2!1sen!2sin!4v1625634567890!5m2!1sen!2sin&maptype=satellite" 
                     width="100%" 
                     height="100%" 
-                    style={{border:0, filter: 'grayscale(0.5) contrast(1.2)'}} 
-                    allowFullScreen={true} 
+                    style={{border:0, filter: 'grayscale(0.5) contrast(1.2)'}}
+                    allowFullScreen={true}
                     loading="lazy"
                     title="Venue Map"
                 ></iframe>
@@ -406,6 +424,15 @@ export default function App() {
         <h2 className="font-serif text-4xl text-f-pink mb-2 text-glow">Live Event Feed</h2>
         <p className="text-f-white/80 mb-10">Captured moments from the celebration.</p>
         <Gallery isAdmin={isAdmin} />
+        <div className="mt-8">
+            <h3 className="font-serif text-2xl text-f-pink mb-4">Share Your Photos</h3>
+            <div className="flex justify-center">
+                <div className="bg-white p-4 rounded-lg">
+                    <QRCode value={window.location.origin + '/qr'} size={128} />
+                </div>
+            </div>
+            <p className="text-f-white/80 mt-4">Scan the QR code to upload or download photos from the event.</p>
+        </div>
       </Section>
 
       {/* Guestbook / Wishes */}

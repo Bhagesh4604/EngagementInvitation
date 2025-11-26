@@ -15,82 +15,72 @@
 
     <style>
       :root {
-        /* Default Theme set to Elegant (White & Gold) */
-        --c-bg: #FDFBF7;        /* Warm White/Cream */
-        --c-card: #FFFFFF;      /* White */
-        --c-text: #1F2937;      /* Dark Gray */
-        --c-accent: #B8860B;    /* Dark Goldenrod */
-        --c-highlight: #8B0000; /* Deep Maroon */
-        --c-overlay: rgba(255, 255, 255, 0.95);
-      }
-
-      /* Futuristic Rich (Neon) */
-      [data-theme='default'] {
-        --c-bg: #2E1065;
-        --c-card: #4C1D95;
-        --c-text: #FFFFFF;
-        --c-accent: #D946EF;
-        --c-highlight: #F59E0B;
+        /* Default Theme: Futuristic Rich (Neon) */
+        --c-bg: #2E1065;        /* Deep Violet */
+        --c-card: #4C1D95;      /* Lighter Violet/Blue */
+        --c-text: #FFFFFF;      /* White */
+        --c-accent: #D946EF;    /* Fuchsia/Pink */
+        --c-highlight: #F59E0B; /* Amber/Gold */
         --c-overlay: rgba(46, 16, 101, 0.8);
       }
 
       /* Royal Theme */
       [data-theme='royal'] {
-        --c-bg: #450a0a;
-        --c-card: #7f1d1d;
-        --c-text: #fff1f2;
-        --c-accent: #fbbf24;
-        --c-highlight: #f59e0b;
+        --c-bg: #450a0a;        /* Red 950 */
+        --c-card: #7f1d1d;      /* Red 900 */
+        --c-text: #fff1f2;      /* Rose 50 */
+        --c-accent: #fbbf24;    /* Amber 400 (Gold) */
+        --c-highlight: #f59e0b; /* Amber 500 */
         --c-overlay: rgba(69, 10, 10, 0.8);
       }
 
       /* Ocean Theme */
       [data-theme='ocean'] {
-        --c-bg: #0f172a;
-        --c-card: #1e293b;
-        --c-text: #f0f9ff;
-        --c-accent: #38bdf8;
-        --c-highlight: #0ea5e9;
+        --c-bg: #0f172a;        /* Slate 900 */
+        --c-card: #1e293b;      /* Slate 800 */
+        --c-text: #f0f9ff;      /* Sky 50 */
+        --c-accent: #38bdf8;    /* Sky 400 */
+        --c-highlight: #0ea5e9; /* Sky 500 */
         --c-overlay: rgba(15, 23, 42, 0.8);
       }
 
       /* Forest Theme */
       [data-theme='forest'] {
-        --c-bg: #052e16;
-        --c-card: #14532d;
-        --c-text: #f0fdf4;
-        --c-accent: #4ade80;
-        --c-highlight: #a3e635;
+        --c-bg: #052e16;        /* Green 950 */
+        --c-card: #14532d;      /* Green 900 */
+        --c-text: #f0fdf4;      /* Green 50 */
+        --c-accent: #4ade80;    /* Green 400 */
+        --c-highlight: #a3e635; /* Lime 400 */
         --c-overlay: rgba(5, 46, 22, 0.8);
       }
 
-      /* Elegant Theme (White & Gold) - Explicit */
+      /* Elegant Theme (White & Gold) */
       [data-theme='elegant'] {
-        --c-bg: #FDFBF7;
-        --c-card: #FFFFFF;
-        --c-text: #1F2937;
-        --c-accent: #B8860B;
-        --c-highlight: #8B0000;
+        --c-bg: #FDFBF7;        /* Warm White/Cream */
+        --c-card: #FFFFFF;      /* White */
+        --c-text: #1F2937;      /* Dark Gray */
+        --c-accent: #B8860B;    /* Dark Goldenrod (Darker for readability on white) */
+        --c-highlight: #8B0000; /* Deep Maroon */
         --c-overlay: rgba(255, 255, 255, 0.95);
       }
 
       /* Sunset Theme */
       [data-theme='sunset'] {
-        --c-bg: #431407;
-        --c-card: #7c2d12;
-        --c-text: #fff7ed;
-        --c-accent: #f43f5e;
-        --c-highlight: #fbbf24;
+        --c-bg: #431407;        /* Orange 950 */
+        --c-card: #7c2d12;      /* Orange 900 */
+        --c-text: #fff7ed;      /* Orange 50 */
+        --c-accent: #f43f5e;    /* Rose 500 */
+        --c-highlight: #fbbf24; /* Amber 400 */
         --c-overlay: rgba(67, 20, 7, 0.8);
       }
 
       /* Midnight Theme */
       [data-theme='midnight'] {
-        --c-bg: #000000;
-        --c-card: #18181b;
-        --c-text: #e4e4e7;
-        --c-accent: #6366f1;
-        --c-highlight: #ec4899;
+        --c-bg: #000000;        /* Black */
+        --c-card: #18181b;      /* Zinc 900 */
+        --c-text: #e4e4e7;      /* Zinc 200 */
+        --c-accent: #6366f1;    /* Indigo 500 */
+        --c-highlight: #ec4899; /* Pink 500 */
         --c-overlay: rgba(0, 0, 0, 0.9);
       }
 
@@ -186,6 +176,7 @@
   }
 }
 </script>
+<link rel="stylesheet" href="/index.css">
 </head>
   <body class="bg-f-purple text-f-white antialiased selection:bg-f-pink selection:text-white transition-colors duration-500">
     <div id="root"></div>
