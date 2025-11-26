@@ -1,4 +1,6 @@
 import React, { useRef, useState } from 'react';
+import { imageDB } from '../utils';
+import { GalleryItem } from '../types';
 
 const mockPhotos = [
   { id: 1, url: 'https://images.unsplash.com/photo-1598201214152-33e2d639c369?q=80&w=2070&auto=format&fit=crop', name: 'engagement-photo-1.jpg' },
@@ -29,10 +31,28 @@ export function QRCodePage() {
     }
   };
 
-  const handleUpload = () => {
-    // Here you would typically upload the files to a server
-    console.log('Uploading files:', selectedFiles);
-    alert(`${selectedFiles.length} photo(s) uploaded successfully!`);
+  const handleUpload = async () => {
+    const filePromises = selectedFiles.map(file => {
+      return new Promise<void>((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const item: GalleryItem = {
+            id: Date.now() + Math.random(),
+            url: reader.result as string,
+            status: 'pending',
+            isUserUploaded: true,
+            timestamp: Date.now()
+          };
+          await imageDB.save(item);
+          resolve();
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    await Promise.all(filePromises);
+
+    alert(`${selectedFiles.length} photo(s) submitted for approval!`);
     setSelectedFiles([]);
   };
 
