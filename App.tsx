@@ -4,7 +4,7 @@ import { Hero } from './components/Hero';
 import { Section } from './components/Section';
 import { Ornament, MandalaPattern } from './components/Ornament';
 import { Gallery } from './components/Gallery';
-import { generateICSFile, storage } from './utils';
+import { generateICSFile } from './utils';
 import { MapPin, Calendar, Clock, Heart, Phone, Mail, Music, ExternalLink, Download, Trash2, Plus, PenSquare } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -14,30 +14,7 @@ import { SiteContent, Wish, Theme, TimelineItem } from './types';
 import { Editable } from './components/Editable';
 import { QRCodePage } from './components/QRCodePage';
 import { QRCodeSVG } from 'qrcode.react';
-
-// Default Data Constants
-const DEFAULT_CONTENT: SiteContent = {
-  heroTitle1: 'Siddharam',
-  heroTitle2: 'Swapna',
-  heroSubtitle: 'With the blessings of our families',
-  heroDate: 'DECEMBER 15, 2025',
-  heroVenue: 'IK Royal Function Hall, Almel',
-  heroBgUrl: 'https://images.unsplash.com/photo-1621621667797-e06afc21085c?q=80&w=2000&auto=format&fit=crop',
-  storyTitle: 'Our Story',
-  storyText: 'In the heart of tradition and family values, our paths crossed. What began as a meeting arranged by our elders blossomed into a connection grounded in mutual respect, shared dreams, and laughter. Siddharam, with his calm demeanor, and Swapna, with her vibrant spirit, found in each other a perfect balance. Now, with hearts full of gratitude, we are ready to take the first step towards our forever.',
-  eventDate: 'Monday, December 15, 2025',
-  eventVenueTitle: 'IK Royal Function Hall',
-  eventVenueAddr: 'Main Road, Almel, Karnataka',
-  eventTime: '6:00 PM Onwards',
-  contactPhone: '+91 98765 43210',
-  contactEmail: 'hello@siddharamswapna.com'
-};
-
-const DEFAULT_TIMELINE: TimelineItem[] = [
-  { id: 1, time: '6:00 PM', title: 'Arrival & Welcome', description: 'Guests arrive. Welcome drinks and snacks will be served accompanied by Shehnai music.' },
-  { id: 2, time: '7:00 PM', title: 'Ring Ceremony', description: 'The auspicious moment where we exchange rings and seek blessings from our elders.' },
-  { id: 3, time: '8:30 PM', title: 'Dinner & Photos', description: 'A traditional vegetarian feast followed by a photo session with the couple.' }
-];
+import { api } from './api';
 
 export default function App() {
   const printRef = useRef<HTMLDivElement>(null);
@@ -45,40 +22,25 @@ export default function App() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [route, setRoute] = useState('/');
   
-  // Initialize State from Storage or Defaults
-  // Using a function in useState ensures this only runs once on mount
-  const [theme, setTheme] = useState<Theme>(() => storage.load<Theme>('site_theme', 'elegant'));
-  const [content, setContent] = useState<SiteContent>(() => storage.load<SiteContent>('site_content', DEFAULT_CONTENT));
-  const [timelineItems, setTimelineItems] = useState<TimelineItem[]>(() => storage.load<TimelineItem[]>('site_timeline', DEFAULT_TIMELINE));
-  const [wishes, setWishes] = useState<Wish[]>(() => storage.load<Wish[]>('site_wishes', [
-    { id: 1, author: 'Rajesh & Family', message: 'Congratulations Siddharam & Swapna! Wishing you a lifetime of happiness.', timestamp: 1 },
-    { id: 2, author: 'Priya K.', message: 'So happy for you both! Can\'t wait to celebrate.', timestamp: 2 }
-  ]));
+  const [theme, setTheme] = useState<Theme>('elegant');
+  const [content, setContent] = useState<SiteContent | null>(null);
+  const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([]);
+  const [wishes, setWishes] = useState<Wish[]>([]);
   
   const [newWish, setNewWish] = useState('');
 
-  // Persist State Changes
   useEffect(() => {
-    storage.save('site_theme', theme);
-    // Apply theme to document immediately when it changes
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
-
-  useEffect(() => {
-    storage.save('site_content', content);
-  }, [content]);
-
-  useEffect(() => {
-    storage.save('site_timeline', timelineItems);
-  }, [timelineItems]);
-
-  useEffect(() => {
-    storage.save('site_wishes', wishes);
-  }, [wishes]);
-
-  // Initial Theme Set (Safety check)
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
+    const loadData = async () => {
+      const [contentData, timelineData, wishesData] = await Promise.all([
+        api.getContent(),
+        api.getTimeline(),
+        api.getWishes(),
+      ]);
+      setContent(contentData);
+      setTimelineItems(timelineData);
+      setWishes(wishesData);
+    };
+    loadData();
   }, []);
 
   useEffect(() => {
@@ -95,54 +57,64 @@ export default function App() {
   // Handle Theme Change
   const handleThemeChange = (newTheme: Theme) => {
     setTheme(newTheme);
+    document.documentElement.setAttribute('data-theme', newTheme);
   };
 
   // Handle Content Update
-  const handleContentUpdate = (field: keyof SiteContent, value: string) => {
-    setContent(prev => ({ ...prev, [field]: value }));
+  const handleContentUpdate = async (field: keyof SiteContent, value: string) => {
+    if (!content) return;
+    const newContent = { ...content, [field]: value };
+    setContent(newContent);
+    await api.updateContent(newContent);
   };
 
-  const resetHeroBg = () => {
-      setContent(prev => ({
-          ...prev, 
-          heroBgUrl: 'https://images.unsplash.com/photo-1621621667797-e06afc21085c?q=80&w=2000&auto=format&fit=crop'
-      }));
+  const resetHeroBg = async () => {
+      if (!content) return;
+      const newContent = { ...content, heroBgUrl: 'https://images.unsplash.com/photo-1621621667797-e06afc21085c?q=80&w=2000&auto=format&fit=crop' };
+      setContent(newContent);
+      await api.updateContent(newContent);
   };
 
   // Handle Timeline Updates
-  const updateTimelineItem = (id: number, field: keyof TimelineItem, value: string) => {
-      setTimelineItems(prev => prev.map(item => item.id === id ? { ...item, [field]: value } : item));
+  const updateTimelineItem = async (id: number, field: keyof TimelineItem, value: string) => {
+      const newTimelineItems = timelineItems.map(item => item.id === id ? { ...item, [field]: value } : item);
+      setTimelineItems(newTimelineItems);
+      const itemToUpdate = newTimelineItems.find(item => item.id === id);
+      if(itemToUpdate) {
+          await api.updateTimelineItem(id, itemToUpdate);
+      }
   };
 
-  const deleteTimelineItem = (id: number) => {
+  const deleteTimelineItem = async (id: number) => {
       setTimelineItems(prev => prev.filter(item => item.id !== id));
+      await api.deleteTimelineItem(id);
   };
 
-  const addTimelineItem = () => {
-      const newItem: TimelineItem = {
-          id: Date.now(),
+  const addTimelineItem = async () => {
+      const newItem: Omit<TimelineItem, 'id'> = {
           time: '00:00 PM',
           title: 'New Event',
           description: 'Description of the event.'
       };
-      setTimelineItems(prev => [...prev, newItem]);
+      const addedItem = await api.addTimelineItem(newItem);
+      setTimelineItems(prev => [...prev, addedItem]);
   };
 
   // Handle Wish Actions
-  const addWish = () => {
+  const addWish = async () => {
     if (!newWish.trim()) return;
-    const wish: Wish = {
-      id: Date.now(),
+    const wish: Omit<Wish, 'id' | 'timestamp'> = {
       author: 'Guest',
       message: newWish,
-      timestamp: Date.now()
     };
-    setWishes(prev => [wish, ...prev]);
+    const addedWish = await api.addWish(wish);
+    setWishes(prev => [addedWish, ...prev]);
     setNewWish('');
   };
 
-  const deleteWish = (id: number) => {
+  const deleteWish = async (id: number) => {
     setWishes(prev => prev.filter(w => w.id !== id));
+    await api.deleteWish(id);
   };
 
   const handleDownloadPDF = async () => {
@@ -176,6 +148,10 @@ export default function App() {
 
   if (route === '/qr') {
     return <QRCodePage />;
+  }
+
+  if (!content) {
+    return <div>Loading...</div>;
   }
 
   return (

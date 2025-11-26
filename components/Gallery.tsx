@@ -1,16 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Upload, Shield, Check, Trash2, ImagePlus, RefreshCcw, Download, QrCode, Grid, Users, Camera, Lock } from 'lucide-react';
 import { GalleryItem } from '../types';
-import { imageDB } from '../utils';
-
-const defaultImages = [
-    "https://picsum.photos/id/10/800/600",
-    "https://picsum.photos/id/20/800/600",
-    "https://picsum.photos/id/30/800/600",
-    "https://picsum.photos/id/40/800/600",
-    "https://picsum.photos/id/50/800/600",
-    "https://picsum.photos/id/60/800/600"
-];
+import { api } from '../api';
 
 interface GalleryProps {
   isAdmin: boolean;
@@ -29,30 +20,8 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
   const [showScanOptions, setShowScanOptions] = useState(false);
 
   const loadImages = async () => {
-      try {
-          const stored = await imageDB.getAll();
-          if (stored && stored.length > 0) {
-              setImages(stored);
-          } else {
-              // Initial load of default images if DB is empty
-              console.log("Seeding default images...");
-              const initialItems: GalleryItem[] = defaultImages.map((url, idx) => ({
-                  id: `def-${idx}`,
-                  url,
-                  status: 'approved',
-                  isUserUploaded: false,
-                  timestamp: Date.now()
-              }));
-              
-              // CRITICAL: Persist defaults immediately
-              for (const item of initialItems) {
-                  await imageDB.save(item);
-              }
-              setImages(initialItems);
-          }
-      } catch (e) {
-          console.error("Failed to load images", e);
-      }
+    const allImages = await api.getGallery();
+    setImages(allImages);
   };
 
   // Load images from DB on mount and on 'photosUploaded' event
@@ -95,15 +64,7 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
     setUploadMessage(null);
     setShowScanOptions(false);
     
-    let processedCount = 0;
-    const newItems: GalleryItem[] = [];
-
-    // Determine target category:
-    // If Admin is on "Official" tab, it goes to official.
-    // Otherwise (Guest or Admin on Guest tab), it goes to user uploads.
     const isTargetOfficial = isAdmin && activeTab === 'official';
-    
-    // Admin uploads are auto-approved
     const targetStatus = isAdmin ? 'approved' : 'pending';
 
     const filePromises = Array.from(files).map(file => {
@@ -114,20 +75,12 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
             }
             const reader = new FileReader();
             reader.onloadend = async () => {
-                const item: GalleryItem = {
-                    id: Date.now() + Math.random(),
+                const item: Omit<GalleryItem, 'id' | 'timestamp'> = {
                     url: reader.result as string,
                     status: targetStatus,
                     isUserUploaded: !isTargetOfficial, 
-                    timestamp: Date.now()
                 };
-                newItems.push(item);
-                // Save to DB immediately
-                try {
-                    await imageDB.save(item);
-                } catch(err) {
-                    console.error("Failed to save image", err);
-                }
+                await api.uploadToGallery(item);
                 resolve();
             };
             reader.readAsDataURL(file);
@@ -136,20 +89,19 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
 
     await Promise.all(filePromises);
 
-    setImages(prev => [...prev, ...newItems]); // Append new items to previous state
+    loadImages();
     setIsUploading(false);
     
     if (isTargetOfficial) {
-        setUploadMessage(`Added ${newItems.length} photos to Official Highlights.`);
+        setUploadMessage(`Added ${files.length} photos to Official Highlights.`);
     } else if (isAdmin) {
-        setUploadMessage(`Added ${newItems.length} photos to Guest Gallery.`);
+        setUploadMessage(`Added ${files.length} photos to Guest Gallery.`);
     } else {
-        setUploadMessage(`Uploaded ${newItems.length} photos! Awaiting approval.`);
+        setUploadMessage(`Uploaded ${files.length} photos! Awaiting approval.`);
     }
     
     setTimeout(() => setUploadMessage(null), 4000);
     
-    // Switch tab only if we uploaded as a guest or admin intended for guest tab
     if (!isTargetOfficial) {
         setActiveTab('guest');
     }
@@ -161,32 +113,29 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
         const reader = new FileReader();
         reader.onloadend = async () => {
             const newUrl = reader.result as string;
-            setImages(prev => prev.map(img => {
-                if (img.id === id) {
-                    const updated = { ...img, url: newUrl };
-                    // Save update to DB
-                    imageDB.save(updated).catch(err => console.log('Could not save replaced image to DB', err));
-                    return updated;
-                }
-                return img;
-            }));
+            const itemToUpdate = images.find(img => img.id === id);
+            if (itemToUpdate) {
+                const updatedItem = { ...itemToUpdate, url: newUrl };
+                await api.updateGalleryItem(itemToUpdate.id, updatedItem);
+                loadImages();
+            }
         };
         reader.readAsDataURL(file);
     }
   };
 
-  const approvePhoto = async (id: string | number) => {
+  const approvePhoto = async (id: number) => {
     const item = images.find(img => img.id === id);
     if (item) {
-        const updated = { ...item, status: 'approved' as const };
-        setImages(prev => prev.map(img => img.id === id ? updated : img));
-        await imageDB.save(updated);
+        const updatedItem = { ...item, status: 'approved' as const };
+        await api.updateGalleryItem(id, updatedItem);
+        loadImages();
     }
   };
 
-  const rejectPhoto = async (id: string | number) => {
-    setImages(prev => prev.filter(img => img.id !== id));
-    await imageDB.delete(id);
+  const rejectPhoto = async (id: number) => {
+    await api.deleteGalleryItem(id);
+    loadImages();
   };
 
   const handleDownload = (url: string) => {
@@ -328,7 +277,7 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                             <div onClick={(e) => e.stopPropagation()}>
                                 <input 
                                     type="file" 
-                                    id={`replace-${img.id}`} 
+                                id={`replace-${img.id}`} 
                                     className="hidden" 
                                     accept="image/*"
                                     onChange={(e) => handleReplaceImage(e, img.id)}
@@ -355,7 +304,7 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                         {canDownload && (
                             <button 
                                 onClick={() => handleDownload(img.url)}
-                                className="flex items-center gap-2 bg-f-orange hover:bg-white hover:text-f-orange text-white px-4 py-2 rounded-full font-bold transition-all shadow-lg hover:shadow-f-orange/50"
+                                className="flex items-center gap-2 bg-f-pink hover:bg-white hover:text-f-pink text-white px-4 py-2 rounded-full font-bold transition-all shadow-lg hover:shadow-f-pink/50"
                             >
                                 <Download size={16} />
                             </button>
@@ -399,7 +348,7 @@ export const Gallery: React.FC<GalleryProps> = ({ isAdmin }) => {
                         {canDownload ? (
                             <button 
                                 onClick={() => handleDownload(selectedImage)}
-                                className="flex items-center gap-2 bg-f-orange hover:bg-white hover:text-f-orange text-white px-8 py-3 rounded-full font-bold transition-all shadow-lg hover:shadow-f-orange/50"
+                                className="flex items-center gap-2 bg-f-pink hover:bg-white hover:text-f-pink text-white px-8 py-3 rounded-full font-bold transition-all shadow-lg hover:shadow-f-pink/50"
                             >
                                 <Download size={20} /> Download Original
                             </button>

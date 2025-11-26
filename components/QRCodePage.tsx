@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { imageDB } from '../utils';
+import { api } from '../api';
 import { GalleryItem } from '../types';
 
 const mockPhotos = [
@@ -36,14 +36,12 @@ export function QRCodePage() {
       return new Promise<void>((resolve) => {
         const reader = new FileReader();
         reader.onloadend = async () => {
-          const item: GalleryItem = {
-            id: Date.now() + Math.random(),
+          const item: Omit<GalleryItem, 'id' | 'timestamp'> = {
             url: reader.result as string,
             status: 'pending',
             isUserUploaded: true,
-            timestamp: Date.now()
           };
-          await imageDB.save(item);
+          await api.uploadToGallery(item);
           resolve();
         };
         reader.readAsDataURL(file);
@@ -130,9 +128,9 @@ export function QRCodePage() {
                 />
                 <button
                   onClick={() => downloadImage(photo.url)}
-                  className="absolute bottom-2 right-2 bg-f-orange text-white p-2 rounded-full shadow-lg"
+                  className="absolute bottom-2 right-2 bg-f-pink text-white p-2 rounded-full shadow-lg"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 </button>
               </div>
             ))}
