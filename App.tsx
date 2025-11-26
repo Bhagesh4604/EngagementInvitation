@@ -210,14 +210,14 @@ export default function App() {
                 </div>
 
                 <div className="flex justify-around w-full max-w-lg mx-auto mt-8">
-                     <div className="text-center">
-                         <Clock size={32} className="text-f-orange mx-auto mb-2" />
-                         <p className="font-serif text-2xl">{content.eventTime}</p>
-                     </div>
-                     <div className="text-center">
-                         <MapPin size={32} className="text-f-orange mx-auto mb-2" />
-                         <p className="font-serif text-2xl max-w-[200px]">{content.eventVenueTitle}</p>
-                     </div>
+                      <div className="text-center">
+                          <Clock size={32} className="text-f-orange mx-auto mb-2" />
+                          <p className="font-serif text-2xl">{content.eventTime}</p>
+                      </div>
+                      <div className="text-center">
+                          <MapPin size={32} className="text-f-orange mx-auto mb-2" />
+                          <p className="font-serif text-2xl max-w-[200px]">{content.eventVenueTitle}</p>
+                      </div>
                 </div>
             </div>
 
@@ -265,7 +265,7 @@ export default function App() {
                 </div>
                 <h3 className="font-serif text-xl font-bold mb-2 text-f-white">When</h3>
                 <div className="text-f-white/80">
-                     <Editable text={content.eventDate} onSave={val => handleContentUpdate('eventDate', val)} isEditing={isAdmin} />
+                      <Editable text={content.eventDate} onSave={val => handleContentUpdate('eventDate', val)} isEditing={isAdmin} />
                 </div>
                 
                 <div className="flex flex-col gap-2 mt-4">
@@ -293,10 +293,10 @@ export default function App() {
                 </div>
                 <h3 className="font-serif text-xl font-bold mb-2 text-f-white">Where</h3>
                 <div className="text-f-white/80 font-bold">
-                     <Editable text={content.eventVenueTitle} onSave={val => handleContentUpdate('eventVenueTitle', val)} isEditing={isAdmin} />
+                      <Editable text={content.eventVenueTitle} onSave={val => handleContentUpdate('eventVenueTitle', val)} isEditing={isAdmin} />
                 </div>
                 <div className="text-f-white/60 text-sm">
-                     <Editable text={content.eventVenueAddr} onSave={val => handleContentUpdate('eventVenueAddr', val)} isEditing={isAdmin} />
+                      <Editable text={content.eventVenueAddr} onSave={val => handleContentUpdate('eventVenueAddr', val)} isEditing={isAdmin} />
                 </div>
             </div>
 
@@ -372,7 +372,7 @@ export default function App() {
                             <p className="text-f-white/80">{content.eventVenueAddr}</p>
                             
                             <a 
-                                href="https://www.google.com/maps/dir/?api=1&destination=IK+Royal+Function+Hall,+Almel,+Karnataka"
+                                href="https://maps.app.goo.gl/2AdQtkhGBCyvaU6s5"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-2 mt-3 text-f-pink font-bold hover:text-f-orange transition-colors text-sm uppercase tracking-wider group"
@@ -384,14 +384,14 @@ export default function App() {
                         </div>
                     </div>
                     <p className="text-sm text-f-white/60 italic mt-4 pl-10">
-                        Ample parking is available at the venue.
+                          Parking is available at the venue.
                     </p>
                 </div>
             </div>
             <div className="h-64 md:h-auto bg-gray-800 min-h-[300px]">
                 {/* Embed Google Maps */}
                 <iframe 
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3801.077285328409!2d76.123456!3d17.123456!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTfCsDA3JzM0LjQiTiA3NsKwMDcnMjQuNCJF!5e0!3m2!1sen!2sin!4v1625634567890!5m2!1sen!2sin&maptype=satellite" 
+                    src="https://maps.app.goo.gl/2AdQtkhGBCyvaU6s5" 
                     width="100%" 
                     height="100%" 
                     style={{border:0, filter: 'grayscale(0.5) contrast(1.2)'}}
