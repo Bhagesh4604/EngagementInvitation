@@ -2,7 +2,7 @@ export const generateICSFile = () => {
   const event = {
     title: 'Engagement: Siddharam & Swapna',
     description: 'We invite you to celebrate our engagement with joy and love.',
-    location: 'IK Royal Function Hall, Sindagi Road - Almel. Map: https://maps.app.goo.gl/WN99PvNPfMQJkSTV9',
+    location: 'I.K.ROYAL FUNCTION HALL, Royalcolony, Almel, Karnataka 586202. Map: https://maps.app.goo.gl/ch58AqUjnpfjgYQK9',
     start: '20251215T180000', // YYYYMMDDTHHmmSS
     end: '20251215T220000',
   };
