@@ -43,7 +43,12 @@ app.get('/api/content', (req, res) => {
       console.error('Error fetching content:', err);
       res.status(500).send(err);
     } else {
-      res.send(result[0]);
+      const content = result[0];
+      if (content) {
+        content.eventVenueTitle = "I.K.ROYAL FUNCTION HALL";
+        content.eventVenueAddr = "Royalcolony, Almel, Karnataka 586202";
+      }
+      res.send(content);
     }
   });
 });

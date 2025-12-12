@@ -372,7 +372,7 @@ export default function App() {
                             <p className="text-f-white/80">{content.eventVenueAddr}</p>
                             
                             <a 
-                                href="https://maps.app.goo.gl/2AdQtkhGBCyvaU6s5"
+                                href="https://maps.app.goo.gl/KFpVtTHzWrCUSzSC6"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center gap-2 mt-3 text-f-pink font-bold hover:text-f-orange transition-colors text-sm uppercase tracking-wider group"
@@ -391,7 +391,7 @@ export default function App() {
             <div className="h-64 md:h-auto bg-gray-800 min-h-[300px]">
                 {/* Embed Google Maps */}
                 <iframe 
-                    src="https://maps.app.goo.gl/2AdQtkhGBCyvaU6s5" 
+                    src="https://maps.app.goo.gl/KFpVtTHzWrCUSzSC6" 
                     width="100%" 
                     height="100%" 
                     style={{border:0, filter: 'grayscale(0.5) contrast(1.2)'}}
